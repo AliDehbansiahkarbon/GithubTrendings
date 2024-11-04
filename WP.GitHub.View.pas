@@ -56,6 +56,7 @@ type
     procedure mniPascalClick(Sender: TObject);
     procedure mniCClick(Sender: TObject);
     procedure mniSQLClick(Sender: TObject);
+    procedure chk_TopTenClick(Sender: TObject);
   private
     FStylingNotifierIndex: Integer;
     FPeriod: string;
@@ -72,7 +73,9 @@ type
     function TruncateTextToFit(ACanvas: TCanvas; const AText: string; AMaxWidth: Integer): string;
     function FindAvatarImage(APanel: TPanel): TImage;
     procedure AdjustAvatars(AAvatar: TImage);
+    procedure AdjustRepoLink(ALink: TLinkLabelEx; AAvatar: TImage);
     procedure MakeImageCircular(AImage: TImage);
+    function FindRepoLink(APanel: TPanel): TLinkLabelEx;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -92,7 +95,9 @@ uses
 
 procedure TMainFrame.PanelResize(Sender: TObject);
 begin
-  AdjustAvatars(FindAvatarImage(TPanel(Sender)));
+  var Avatar := FindAvatarImage(TPanel(Sender));
+  AdjustAvatars(Avatar);
+  AdjustRepoLink(FindRepoLink(TPanel(Sender)), Avatar);
 end;
 
 procedure TMainFrame.mniSQLClick(Sender: TObject);
@@ -151,7 +156,7 @@ begin
               LvRepoRec.RepoName := LvRepo.GetValue<string>('name');
               LvRepoRec.RepoURL := LvRepo.GetValue<string>('html_url');
               LvRepoRec.Description := LvRepo.GetValue<string>('description');
-              LvRepoRec.CreatedDate := LvRepo.GetValue<TDateTime>('created_at');
+              LvRepoRec.CreatedDate := LvRepo.GetValue<TDateTime>('updated_at');
               LvRepoRec.Language := LvRepo.GetValue<string>('language');
               LvRepoRec.StarCount := LvRepo.GetValue<Integer>('stargazers_count');
               LvRepoRec.ForkCount := LvRepo.GetValue<Integer>('forks');
@@ -197,7 +202,7 @@ begin
   begin
     ClearScrollBox;
     for I := 0 to Pred(FRepositoryList.Count) do
-      TThread.Synchronize(TThread.Current, procedure begin AddRepository(I.ToString, FRepositoryList.Items[I]) end);
+      AddRepository(I.ToString, FRepositoryList.Items[I]);
   end;
 end;
 
@@ -211,6 +216,16 @@ begin
       AAvatar.Left := ScrollBox.Width - AAvatar.Width - 20;
       AAvatar.Top := 3;
     end);
+  end;
+end;
+
+procedure TMainFrame.AdjustRepoLink(ALink: TLinkLabelEx; AAvatar: TImage);
+begin
+  if Assigned(ALink) and Assigned(AAvatar) then
+  begin
+    var Bnd := ALink.BoundsRect;
+    Bnd.Right := AAvatar.Left - 10;
+    ALink.BoundsRect := Bnd;
   end;
 end;
 
@@ -230,6 +245,11 @@ procedure TMainFrame.ChangePeriod(const AListType: string);
 begin
   Btn_LoadRepositories.Caption := AListType;
   FPeriod := AListType.ToLower;
+  RefreshList;
+end;
+
+procedure TMainFrame.chk_TopTenClick(Sender: TObject);
+begin
   RefreshList;
 end;
 
@@ -295,6 +315,19 @@ begin
       var LvImgname: string := LvImg.Name;
       if LvImgname.Equals(cAvatarPrefix + LvImg.Tag.ToString) then
         Result := LvImg;
+    end;
+  end;
+end;
+
+function TMainFrame.FindRepoLink(APanel: TPanel): TLinkLabelEx;
+begin
+  Result := nil;
+  for var I := 0 to Pred(APanel.ControlCount) do
+  begin
+    if APanel.Controls[I] is TLinkLabelEx then
+    begin
+      var LvImg := TLinkLabelEx(APanel.Controls[I]);
+      Result := LvImg;
     end;
   end;
 end;
@@ -389,6 +422,12 @@ begin
   LvPanel.Width := 360;
   LvPanel.ParentColor := True;
   LvPanel.OnResize := PanelResize;
+  LvPanel.BevelEdges := [];
+  LvPanel.BevelKind := TBevelKind.bkNone;
+  LvPanel.BevelOuter := TBevelCut.bvNone;
+  LvPanel.ParentBackground := True;
+  LvPanel.StyleElements := [seClient];
+  LvPanel.BorderStyle := bsNone;
 
   var lbl_Date := TLabel.Create(LvPanel);
   with lbl_Date do
@@ -400,10 +439,10 @@ begin
     Top := 24;
     Width := 42;
     Height := 12;
-    Caption := 'Created at ' + FormatDateTime('ddd MMM dd yyyy', ARepository.CreatedDate);
+    Caption := 'Updated at ' + FormatDateTime('dd.mm.yyyy', ARepository.CreatedDate);
     Font.Charset := DEFAULT_CHARSET;
     Font.Color := clScrollBar;
-    Font.Height := -9;
+    Font.Height := -11;
     Font.Name := 'Segoe UI';
     Font.Style := [];
     ParentFont := False;
@@ -416,7 +455,7 @@ begin
     Transparent := True;
     Name := cDescriptionLabelPrefix + AIndex;
     Left := 7;
-    Top := 45;
+    Top := 42;
     Width := 78;
     Height := 15;
     Caption := TruncateTextToFit(lbl_Description.Canvas, ARepository.Description, LvPanel.Width - 10);
@@ -523,11 +562,12 @@ begin
   var LinkLabel_RepositoryLink := TLinkLabelEx.Create(LvPanel);
   with LinkLabel_RepositoryLink do
   begin
+    AutoSize := False;
     Parent := LvPanel;
     Name := cLinkLablePrefix + AIndex;
     Left := 7;
     Top := 5;
-    Width := 204;
+    Width := 150;
     Height := 19;
     Tag := AIndex.ToInteger;
     Caption := ARepository.Author + '/' + ARepository.RepoName;
@@ -556,8 +596,10 @@ begin
     OnClick := ImgClick;
     Hint := ARepository.Author;
   end;
+
   MakeImageCircular(Img_Avatar);
   AdjustAvatars(Img_Avatar);
+  AdjustRepoLink(LinkLabel_RepositoryLink, Img_Avatar);
 end;
 
 procedure TMainFrame.LoadImageFromResource(const AImage: TImage; const AResourceName: string);

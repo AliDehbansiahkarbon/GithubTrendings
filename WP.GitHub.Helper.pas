@@ -69,6 +69,8 @@ begin
     1: FromDate := IncDay(ToDate, -7);    // 7 days ago
     2: FromDate := IncDay(ToDate, -30);   // 30 days ago
     3: FromDate := IncDay(ToDate, -365);  // 365 days ago
+  else
+    FromDate := IncHour(ToDate, -24);  // 24 hours ago
   end;
 
   Result := DateTimeToISO8601(FromDate) + '..' + DateTimeToISO8601(ToDate);
