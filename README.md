@@ -1,5 +1,5 @@
 # GithubTrendings
-This welcome package for RAD Studio showcases a list of trending Pascal repositories for the day, week, month, or year on the welcome page.
+This welcome package for RAD Studio showcases a list of trending Pascal repositories for the day, week, month, or year on the welcome page. (RAD Studio 12 and above only)
 
 This plugin keeps you updated on the community's latest achievements without the need to open a browser and search on the GitHub trendings page.
 This repository list is sorted in ascending order by star count.
