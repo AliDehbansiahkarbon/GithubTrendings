@@ -41,7 +41,7 @@ object MainFrame: TMainFrame
       AlignWithMargins = True
       Left = 3
       Top = 3
-      Width = 59
+      Width = 65
       Height = 24
       Align = alLeft
       Caption = 'Daily'
@@ -51,9 +51,9 @@ object MainFrame: TMainFrame
     end
     object Btn_ChangeLanguage: TButton
       AlignWithMargins = True
-      Left = 68
+      Left = 74
       Top = 3
-      Width = 66
+      Width = 65
       Height = 24
       Align = alLeft
       Caption = 'Pascal'
@@ -63,7 +63,7 @@ object MainFrame: TMainFrame
     end
     object chk_TopTen: TCheckBox
       AlignWithMargins = True
-      Left = 140
+      Left = 145
       Top = 3
       Width = 54
       Height = 24
@@ -79,15 +79,34 @@ object MainFrame: TMainFrame
     Top = 3
     Width = 375
     Height = 394
-    VertScrollBar.Smooth = True
-    VertScrollBar.Size = 2
+    VertScrollBar.Increment = 35
+    VertScrollBar.Size = 1
+    VertScrollBar.Style = ssHotTrack
     VertScrollBar.Tracking = True
     Align = alClient
+    BevelOuter = bvNone
     BorderStyle = bsNone
     ParentBackground = True
     TabOrder = 1
     UseWheelForScrolling = True
     StyleElements = [seFont, seBorder]
+    object ControlList1: TControlList
+      Left = 0
+      Top = 0
+      Width = 375
+      Height = 0
+      Margins.Right = 20
+      Align = alTop
+      BorderStyle = bsNone
+      ItemMargins.Left = 0
+      ItemMargins.Top = 0
+      ItemMargins.Right = 0
+      ItemMargins.Bottom = 0
+      ColumnLayout = cltMultiTopToBottom
+      ParentColor = False
+      TabOrder = 0
+      SmoothMouseWheelScrolling = True
+    end
   end
   object ActivityIndicator1: TActivityIndicator
     Left = 159

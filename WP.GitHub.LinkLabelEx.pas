@@ -3,7 +3,8 @@ unit WP.GitHub.LinkLabelEx;
 interface
 
 uses
-  System.Classes, Vcl.Controls, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.Graphics, Winapi.Messages;
+  System.Classes, Vcl.Controls, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.Graphics,
+  Winapi.Messages, System.SysUtils;
 
 type
   TLinkLabelEx = class(TLabel)
@@ -17,6 +18,7 @@ type
     procedure SetVisitedColor(const Value: TColor);
     procedure CMMouseEnter(var Message: TMessage); message CM_MOUSEENTER;
     procedure CMMouseLeave(var Message: TMessage); message CM_MOUSELEAVE;
+    procedure SetCaptionEx(const Value: TCaption);
   protected
     procedure DoLinkClick;
   public
@@ -26,6 +28,7 @@ type
     property LinkColor: TColor read FLinkColor write SetLinkColor default clBlue;
     property HoverColor: TColor read FHoverColor write SetHoverColor default clRed;
     property VisitedColor: TColor read FVisitedColor write SetVisitedColor default clPurple;
+    property CaptionEx: TCaption write SetCaptionEx;
   end;
 
 implementation
@@ -46,6 +49,19 @@ begin
   FLinkColor := Value;
   if not FVisited then
     Font.Color := FLinkColor;
+end;
+
+function CapitalizeFirstChar(const Input: string): string;
+begin
+  if Input <> '' then
+    Result := UpperCase(Input[1]) + Copy(Input, 2, Length(Input) - 1)
+  else
+    Result := '';
+end;
+
+procedure TLinkLabelEx.SetCaptionEx(const Value: TCaption);
+begin
+  Self.Caption := CapitalizeFirstChar(Value);
 end;
 
 procedure TLinkLabelEx.SetHoverColor(const Value: TColor);

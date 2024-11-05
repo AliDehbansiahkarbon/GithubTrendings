@@ -8,7 +8,8 @@ uses
   Vcl.Menus, System.JSON, System.Net.HttpClient, System.Net.URLClient, System.Generics.Collections,
   System.Net.HttpClientComponent, WP.GitHub.Helper, System.Threading, Vcl.WinXCtrls, Winapi.ShellAPI,
   Vcl.Themes, ToolsAPI, Vcl.Imaging.jpeg, Vcl.GraphUtil, System.Generics.Defaults,
-  System.Math, WP.GitHub.LinkLabelEx, Vcl.Imaging.pngimage, WP.GitHub.Constants;
+  System.Math, WP.GitHub.LinkLabelEx, Vcl.Imaging.pngimage, WP.GitHub.Constants,
+  Vcl.ControlList;
 
 type
   TStyleNotifier = class(TNotifierObject, INTAIDEThemingServicesNotifier)
@@ -47,6 +48,7 @@ type
     mniSQL: TMenuItem;
     mniC: TMenuItem;
     chk_TopTen: TCheckBox;
+    ControlList1: TControlList;
     procedure mniDailyClick(Sender: TObject);
     procedure mniWeeklyClick(Sender: TObject);
     procedure mniMonthlyClick(Sender: TObject);
@@ -64,7 +66,7 @@ type
     FRepositoryList: TList<TRepository>;
     FStyleNotifier: TStyleNotifier;
     procedure RefreshList;
-    procedure AddRepository(const AIndex: string; const ARepository: TRepository);
+    procedure AddRepository(const AIndex: string; const ARepository: TRepository; AThemingEnabled: Boolean; AColor: TColor);
     procedure LinkLabel_RepositoryLinkClick(Sender: TObject);
     procedure UpdateUI(AIsEmpty: Boolean = False; AMsg: string = '');
     procedure ChangePeriod(const AListType: string);
@@ -74,7 +76,6 @@ type
     function FindAvatarImage(APanel: TPanel): TImage;
     procedure AdjustAvatars(AAvatar: TImage);
     procedure AdjustRepoLink(ALink: TLinkLabelEx; AAvatar: TImage);
-    procedure MakeImageCircular(AImage: TImage);
     function FindRepoLink(APanel: TPanel): TLinkLabelEx;
   public
     constructor Create(AOwner: TComponent); override;
@@ -163,7 +164,7 @@ begin
               LvRepoRec.RepoName := LvRepo.GetValue<string>('name');
               LvRepoRec.RepoURL := LvRepo.GetValue<string>('html_url');
               LvRepoRec.Description := LvRepo.GetValue<string>('description');
-              LvRepoRec.CreatedDate := LvRepo.GetValue<TDateTime>('updated_at');
+              LvRepoRec.CreatedDate := LvRepo.GetValue<TDateTime>('created_at');
               LvRepoRec.Language := LvRepo.GetValue<string>('language');
               LvRepoRec.StarCount := LvRepo.GetValue<Integer>('stargazers_count');
               LvRepoRec.ForkCount := LvRepo.GetValue<Integer>('forks');
@@ -195,7 +196,11 @@ end;
 procedure TMainFrame.UpdateUI(AIsEmpty: Boolean = False; AMsg: string = '');
 var
   I: Integer;
+  LvThemingServices: IOTAIDEThemingServices;
+  LvThemingEnabled: Boolean;
+  LvNewColor: TColor;
 begin
+  LvThemingEnabled := False;
   ActivityIndicator1.StopAnimation;
   ActivityIndicator1.Visible := False;
 
@@ -223,9 +228,15 @@ begin
 
   if FRepositoryList.Count > 0 then
   begin
+    if Supports(BorlandIDEServices, IOTAIDEThemingServices, LvThemingServices) and LvThemingServices.IDEThemingEnabled then
+    begin
+      LvThemingEnabled := True;
+      LvNewColor := LvThemingServices.StyleServices.GetSystemColor(clWindow);
+    end;
+
     ClearScrollBox;
     for I := 0 to Pred(FRepositoryList.Count) do
-      AddRepository(I.ToString, FRepositoryList.Items[I]);
+      AddRepository(I.ToString, FRepositoryList.Items[I], LvThemingEnabled, LvNewColor);
   end;
 end;
 
@@ -236,7 +247,7 @@ begin
     TThread.Synchronize(TThread.Current,
     procedure
     begin
-      AAvatar.Left := ScrollBox.Width - AAvatar.Width - 20;
+      AAvatar.Left := ControlList1.Width - AAvatar.Width - 5;
       AAvatar.Top := 3;
     end);
   end;
@@ -295,6 +306,7 @@ begin
       ScrollBox.Components[I].Free;
   end;
 
+  ControlList1.Height := 0;
   ScrollBox.Invalidate;
 end;
 
@@ -429,25 +441,30 @@ begin
   Result := cNoDescription;
 end;
 
-procedure TMainFrame.AddRepository(const AIndex: string; const ARepository: TRepository);
+procedure TMainFrame.AddRepository(const AIndex: string; const ARepository: TRepository; AThemingEnabled: Boolean; AColor: TColor);
 var
   LvPanel: TPanel;
 begin
   LvPanel := TPanel.Create(Self);
   LvPanel.Name := cPanelPrefix + AIndex;
   LvPanel.Caption := EmptyStr;
-  LvPanel.Parent := ScrollBox;
+  LvPanel.Parent := ControlList1;
   LvPanel.Align := alTop;
-  LvPanel.Height := 83;
-  LvPanel.Width := 360;
-  LvPanel.ParentColor := True;
+  LvPanel.Height := 85;
   LvPanel.OnResize := PanelResize;
   LvPanel.BevelEdges := [];
   LvPanel.BevelKind := TBevelKind.bkNone;
   LvPanel.BevelOuter := TBevelCut.bvNone;
-  LvPanel.ParentBackground := True;
-  LvPanel.StyleElements := [seClient];
+
+  if AThemingEnabled then
+  begin
+    LvPanel.StyleElements := LvPanel.StyleElements - [seClient];
+    LvPanel.ParentBackground := False;
+    LvPanel.Color := AColor;
+  end;
+
   LvPanel.BorderStyle := bsNone;
+  ControlList1.Height := ControlList1.Height + LvPanel.Height;
 
   var lbl_Date := TLabel.Create(LvPanel);
   with lbl_Date do
@@ -459,7 +476,7 @@ begin
     Top := 24;
     Width := 42;
     Height := 12;
-    Caption := 'Updated at ' + FormatDateTime('dd.mm.yyyy', ARepository.CreatedDate);
+    Caption := 'Created at ' + FormatDateTime('dd.mm.yyyy', ARepository.CreatedDate);
     Font.Charset := DEFAULT_CHARSET;
     Font.Color := clScrollBar;
     Font.Height := -11;
@@ -472,13 +489,18 @@ begin
   with lbl_Description do
   begin
     Parent := LvPanel;
+    AutoSize := False;
     Transparent := True;
     Name := cDescriptionLabelPrefix + AIndex;
     Left := 7;
     Top := 42;
-    Width := 78;
-    Height := 15;
-    Caption := TruncateTextToFit(lbl_Description.Canvas, ARepository.Description, LvPanel.Width - 10);
+    Width := ControlList1.Width - 1;
+    if lbl_Description.Canvas.TextWidth(ARepository.Description) <= ControlList1.Width then
+      Height := 30
+    else
+      Height := 40;
+    WordWrap := True;
+    Caption := TruncateTextToFit(lbl_Description.Canvas, ARepository.Description, (LvPanel.Width * 2) - 20);
     Hint := ARepository.Description;
     ShowHint := True;
   end;
@@ -490,7 +512,11 @@ begin
     Transparent := True;
     Name := cStarsPrefix + AIndex;
     Left := 7;
-    Top := 60;
+    if lbl_Description.Canvas.TextWidth(ARepository.Description) <= ControlList1.Width then
+      Top := 60
+    else
+      Top := 70;
+
     Width := 16;
     Height := 16;
     LoadImageFromResource(Img_Stars, 'STAR');
@@ -503,7 +529,11 @@ begin
     Transparent := True;
     Name := cStarCountPrefix + AIndex;
     Left := Img_Stars.Left + Img_Stars.Width + 2;
-    Top := 62;
+    if lbl_Description.Canvas.TextWidth(ARepository.Description) <= ControlList1.Width then
+      Top := 62
+    else
+      Top := 72;
+
     Width := 5;
     Height := 12;
     Caption := ARepository.StarCount.ToString;
@@ -522,7 +552,11 @@ begin
     Transparent := True;
     Name := cForkPrefix + AIndex;
     Left := lbl_StarCount.Left + lbl_StarCount.Width + 10;
-    Top := 60;
+    if lbl_Description.Canvas.TextWidth(ARepository.Description) <= ControlList1.Width then
+      Top := 60
+    else
+      Top := 70;
+
     Width := 17;
     Height := 16;
     LoadImageFromResource(Img_Fork, 'FORK');
@@ -535,7 +569,11 @@ begin
     Transparent := True;
     Name := cForkCountPrefix + AIndex;
     Left := Img_Fork.Left + Img_Fork.Width + 2;
-    Top := 62;
+    if lbl_Description.Canvas.TextWidth(ARepository.Description) <= ControlList1.Width then
+      Top := 62
+    else
+      Top := 72;
+
     Width := 5;
     Height := 12;
     Caption := ARepository.ForkCount.ToString;
@@ -554,7 +592,11 @@ begin
     Transparent := True;
     Name := cIssuePrefix + AIndex;
     Left := lbl_ForkCount.Left + lbl_ForkCount.Width + 10;
-    Top := 60;
+    if lbl_Description.Canvas.TextWidth(ARepository.Description) <= ControlList1.Width then
+      Top := 60
+    else
+      Top := 70;
+
     Width := 17;
     Height := 16;
     LoadImageFromResource(Img_Issue, 'ISSUE');
@@ -567,7 +609,11 @@ begin
     Transparent := True;
     Name := cIssueCountPrefix + AIndex;
     Left := Img_Issue.Left + Img_Issue.Width + 2;
-    Top := 62;
+    if lbl_Description.Canvas.TextWidth(ARepository.Description) <= ControlList1.Width then
+      Top := 62
+    else
+      Top := 72;
+
     Width := 5;
     Height := 12;
     Caption := ARepository.IssuCount.ToString;
@@ -590,7 +636,7 @@ begin
     Width := 150;
     Height := 19;
     Tag := AIndex.ToInteger;
-    Caption := ARepository.Author + '/' + ARepository.RepoName;
+    CaptionEx := ARepository.Author + '/' + ARepository.RepoName;
     TabOrder := 0;
     ParentColor := False;
     ParentFont := False;
@@ -617,7 +663,6 @@ begin
     Hint := ARepository.Author;
   end;
 
-  MakeImageCircular(Img_Avatar);
   AdjustAvatars(Img_Avatar);
   AdjustRepoLink(LinkLabel_RepositoryLink, Img_Avatar);
 end;
@@ -630,75 +675,20 @@ begin
 end;
 
 { TStyleNotifier }
-
 procedure TStyleNotifier.ChangedTheme;
 var
   LvThemingService: IOTAIDEThemingServices;
 begin
   if Assigned(MainFrame) and Supports(BorlandIDEServices, IOTAIDEThemingServices, LvThemingService) then
+  begin
+    MainFrame.UpdateUI;
     LvThemingService.ApplyTheme(MainFrame);
+  end;
 end;
 
 procedure TStyleNotifier.ChangingTheme;
 begin
 // Not used.
 end;
-
-procedure TMainFrame.MakeImageCircular(AImage: TImage);
-var
-  Radius, Diameter: Integer;
-  Rect: TRect;
-  Bitmap, SourceBitmap: TBitmap;
-  Png: TPngImage;
-begin
-  // Ensure the image is square for a perfect circle.
-  Radius := Min(AImage.Width, AImage.Height) div 2;
-  Diameter := Radius * 2;
-  Rect := TRect.Create(0, 0, Diameter, Diameter);
-
-  // Create a new bitmap with a transparent background
-  Bitmap := TBitmap.Create;
-  try
-    Bitmap.SetSize(Diameter, Diameter);
-    Bitmap.PixelFormat := pf32bit;
-
-    // Check if the source image is a TBitmap or TPngImage
-    if AImage.Picture.Graphic is TBitmap then
-      SourceBitmap := TBitmap(AImage.Picture.Graphic)
-    else
-    begin
-      // If it's not a bitmap, convert the source image to a TBitmap
-      SourceBitmap := TBitmap.Create;
-      try
-        SourceBitmap.Assign(AImage.Picture.Graphic);
-      except
-        SourceBitmap.Free;
-        raise Exception.Create('Could not convert image to TBitmap.');
-      end;
-    end;
-
-    // Draw a circular clipping area and copy the image within it
-    Bitmap.Canvas.Brush.Color := clNone;
-    Bitmap.Canvas.FillRect(Rect);
-    Bitmap.Canvas.Ellipse(0, 0, Diameter, Diameter);
-    Bitmap.Canvas.CopyRect(Rect, SourceBitmap.Canvas, Rect);
-
-    // Convert the circular Bitmap to a PNG with transparency
-    Png := TPngImage.Create;
-    try
-      Png.Assign(Bitmap);
-      AImage.Picture.Assign(Png);
-    finally
-      Png.Free;
-    end;
-
-    // Free the SourceBitmap if we created it ourselves
-    if SourceBitmap <> TBitmap(AImage.Picture.Graphic) then
-      SourceBitmap.Free;
-  finally
-    Bitmap.Free;
-  end;
-end;
-
 
 end.
