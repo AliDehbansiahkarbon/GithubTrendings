@@ -66,7 +66,7 @@ type
     procedure RefreshList;
     procedure AddRepository(const AIndex: string; const ARepository: TRepository);
     procedure LinkLabel_RepositoryLinkClick(Sender: TObject);
-    procedure UpdateUI;
+    procedure UpdateUI(AIsEmpty: Boolean = False; AMsg: string = '');
     procedure ChangePeriod(const AListType: string);
     procedure ChangeLanguage(const ALang: string);
     procedure LoadImageFromResource(const AImage: TImage; const AResourceName: string);
@@ -123,6 +123,13 @@ begin
     ActivityIndicator1.Visible := True;
   end);
 
+  var LvException: string;
+  if not TGitHubHelper.CheckInternetAvailabilityAsync('https://www.github.com', LvException) then
+  begin
+    TThread.Synchronize(TThread.Current, procedure begin UpdateUI(True, LvException); end);
+    Exit;
+  end;
+
   try
     try
       LvJSONResponse := TGitHubHelper.GetTrendingPascalRepositories(FPeriod, FLanguage);
@@ -174,7 +181,8 @@ begin
           end;
         end;
       finally
-        LvJSONObj.Free;
+        if Assigned(LvJSONObj) then
+          LvJSONObj.Free;
       end;
     except on E: Exception do
       ShowMessage('Error: ' + E.Message);
@@ -184,12 +192,27 @@ begin
   end;
 end;
 
-procedure TMainFrame.UpdateUI;
+procedure TMainFrame.UpdateUI(AIsEmpty: Boolean = False; AMsg: string = '');
 var
   I: Integer;
 begin
   ActivityIndicator1.StopAnimation;
   ActivityIndicator1.Visible := False;
+
+  if AIsEmpty then
+  begin
+    ClearScrollBox;
+    var LvEmptyLabel := TLabel.Create(Self);
+    LvEmptyLabel.Name := 'emptylabel';
+    LvEmptyLabel.Parent := ScrollBox;
+    LvEmptyLabel.Caption := AMsg;
+    LvEmptyLabel.Alignment := taCenter;
+    LvEmptyLabel.Font.Size := 12;
+    LvEmptyLabel.Align := alTop;
+    LvEmptyLabel.AutoSize := True;
+    LvEmptyLabel.WordWrap := True;
+    Exit;
+  end;
 
   // Ascending sort by Star Count
   FRepositoryList.Sort(TComparer<TRepository>.Construct(
@@ -265,14 +288,11 @@ begin
 
   for I := Pred(ScrollBox.ComponentCount) downto 0 do
   begin
+    if (Self.Components[I] is TLabel) and (TLabel(Self.Components[I]).Name = 'emptylabel') then
+      Self.Components[I].Free;
+
     if ScrollBox.Components[I] is TPanel then
       ScrollBox.Components[I].Free;
-  end;
-
-  for I := Pred(ScrollBox.ControlCount) downto 0 do
-  begin
-    if ScrollBox.Controls[I] is TPanel then
-      ScrollBox.Controls[I].Free;
   end;
 
   ScrollBox.Invalidate;

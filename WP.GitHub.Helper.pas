@@ -18,9 +18,10 @@ type
     class function GetPeriodRange(const APeriod: string): string;
   public
     class function GetTrendingPascalRepositories(const APeriod: string; const ALanguage: string): string;
+    class function CheckInternetAvailabilityAsync(const URL: string; var AException: string): Boolean; static;
   end;
 
-  TImaheHelper = class helper for TImage
+  TImageHelper = class helper for TImage
   public
     procedure LoadImageFromURL(const AImageURL: string);
   end;
@@ -98,10 +99,33 @@ begin
   end;
 end;
 
+class function TGitHubHelper.CheckInternetAvailabilityAsync(const URL: string; var AException: string): Boolean;
+var
+  HttpClient: THttpClient;
+begin
+  Result := False;
+  HttpClient := THttpClient.Create;
+  HttpClient.ConnectionTimeout := 2000;
+  HttpClient.SendTimeout := 2000;
+  HttpClient.ResponseTimeout := 2000;
+  try
+    try
+      HttpClient.Head(URL);
+      Result := True;
+    except on E: Exception do
+      begin
+        Result := False;
+        AException := 'No internet connection.' + sLineBreak + sLineBreak + 'Exception: ' + sLineBreak + E.Message;
+      end;
+    end;
+  finally
+    HttpClient.Free;
+  end;
+end;
 
 { TImaheHelper }
 
-procedure TImaheHelper.LoadImageFromURL(const AImageURL: string);
+procedure TImageHelper.LoadImageFromURL(const AImageURL: string);
 var
   HTTPClient: THTTPClient;
 begin

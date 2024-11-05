@@ -5,7 +5,7 @@ interface
 const
   cPluginID = 'WP.GitHubTrendingPlugin';
   cPascal = 'Pascal';
-  cC = 'C';
+  cC = 'C/C++';
   cSQL = 'SQL';
   cDaily = 'Daily';
   cWeekly = 'Weekly';
