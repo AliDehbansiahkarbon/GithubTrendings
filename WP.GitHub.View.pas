@@ -642,6 +642,11 @@ begin
     ParentFont := False;
     StyleElements := [seBorder];
 
+    Font.Charset := DEFAULT_CHARSET;
+    Font.Height := -14;
+    Font.Name := 'Segoe UI';
+    Font.Style := [];
+
     LinkColor := clMenuHighlight;
     HoverColor := clHighlight;
     VisitedColor := clGray;
