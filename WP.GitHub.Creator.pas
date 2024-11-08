@@ -3,14 +3,21 @@ unit WP.GitHub.Creator;
 interface
 
 uses
-  System.SysUtils, System.Classes, Vcl.Forms, Vcl.Controls, Vcl.Graphics, Vcl.Dialogs,
-  ToolsAPI.WelcomePage, WP.GitHub.Constants, ToolsAPI;
+  ToolsAPI,
+  System.Classes,
+  System.SysUtils,
+  ToolsAPI.WelcomePage,
+  Vcl.Controls,
+  Vcl.Dialogs,
+  Vcl.Forms,
+  Vcl.Graphics,
+  WP.GitHub.Constants;
 
 type
   TWPDemoPlugInCreator = class(TInterfacedObject, INTAWelcomePagePlugin, INTAWelcomePageContentPluginCreator)
   private
-    FWPPluginView: TFrame;
-    FIconIndex: Integer;
+    FWPPluginView : TFrame;
+    FIconIndex    : Integer;
     { INTAWelcomePageContentPluginCreator }
     function GetView: TFrame;
     function GetIconIndex: Integer;

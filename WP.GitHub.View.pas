@@ -3,13 +3,38 @@ unit WP.GitHub.View;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
-  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
-  Vcl.Menus, System.JSON, System.Net.HttpClient, System.Net.URLClient, System.Generics.Collections,
-  System.Net.HttpClientComponent, WP.GitHub.Helper, System.Threading, Vcl.WinXCtrls, Winapi.ShellAPI,
-  Vcl.Themes, ToolsAPI, Vcl.Imaging.jpeg, Vcl.GraphUtil, System.Generics.Defaults,
-  System.Math, WP.GitHub.LinkLabelEx, Vcl.Imaging.pngimage, WP.GitHub.Constants,
-  Vcl.ControlList, System.Win.Registry;
+  ToolsAPI,
+  System.Classes,
+  System.Generics.Collections,
+  System.Generics.Defaults,
+  System.JSON,
+  System.Math,
+  System.Net.HttpClient,
+  System.Net.HttpClientComponent,
+  System.Net.URLClient,
+  System.SysUtils,
+  System.Threading,
+  System.Variants,
+  System.Win.Registry,
+  Vcl.ControlList,
+  Vcl.Controls,
+  Vcl.Dialogs,
+  Vcl.ExtCtrls,
+  Vcl.Forms,
+  Vcl.GraphUtil,
+  Vcl.Graphics,
+  Vcl.Imaging.jpeg,
+  Vcl.Imaging.pngimage,
+  Vcl.Menus,
+  Vcl.StdCtrls,
+  Vcl.Themes,
+  Vcl.WinXCtrls,
+  WP.GitHub.Constants,
+  WP.GitHub.Helper,
+  WP.GitHub.LinkLabelEx,
+  Winapi.Messages,
+  Winapi.ShellAPI,
+  Winapi.Windows;
 
 type
   TStyleNotifier = class(TNotifierObject, INTAIDEThemingServicesNotifier)
@@ -19,75 +44,81 @@ type
   end;
 
   TRepository = record
-    RepoName: string;
-    RepoURL: string;
-    Author: string;
-    AvatarUrl: string;
-    Description: string;
-    Language: string;
-    StarCount: Integer;
-    ForkCount: Integer;
-    IssuCount: Integer;
-    CreatedDate: TDateTime;
+    RepoName    : string;
+    RepoURL     : string;
+    Author      : string;
+    AvatarUrl   : string;
+    Description : string;
+    Language    : string;
+    StarCount   : Integer;
+    ForkCount   : Integer;
+    IssuCount   : Integer;
+    CreatedDate : TDateTime;
   end;
 
   TMainFrame = class(TFrame)
-    PopupMenuPeriod: TPopupMenu;
-    mniDaily: TMenuItem;
-    mniWeekly: TMenuItem;
-    mniMonthly: TMenuItem;
-    pnlBottom: TPanel;
+    PopupMenuPeriod     : TPopupMenu;
+    mniDaily            : TMenuItem;
+    mniWeekly           : TMenuItem;
+    mniMonthly          : TMenuItem;
+    pnlBottom           : TPanel;
     Btn_LoadRepositories: TButton;
-    ActivityIndicator1: TActivityIndicator;
-    ScrollBox: TScrollBox;
-    mniYearly: TMenuItem;
-    lbl_RepoCount: TLabel;
-    Btn_ChangeLanguage: TButton;
-    PopupMenuLanguage: TPopupMenu;
-    mniPascal: TMenuItem;
-    mniSQL: TMenuItem;
-    mniC: TMenuItem;
-    chk_TopTen: TCheckBox;
-    ControlList1: TControlList;
-    PopupMenuRepoPanel: TPopupMenu;
-    mniFavorites: TMenuItem;
-    chk_favorites: TCheckBox;
-    procedure mniDailyClick(Sender: TObject);
-    procedure mniWeeklyClick(Sender: TObject);
-    procedure mniMonthlyClick(Sender: TObject);
-    procedure mniYearlyClick(Sender: TObject);
-    procedure ImgClick(Sender: TObject);
-    procedure PanelResize(Sender: TObject);
-    procedure mniPascalClick(Sender: TObject);
-    procedure mniCClick(Sender: TObject);
-    procedure mniSQLClick(Sender: TObject);
-    procedure chk_TopTenClick(Sender: TObject);
-    procedure PopupMenuRepoPanelPopup(Sender: TObject);
-    procedure mniFavoritesClick(Sender: TObject);
-    procedure chk_favoritesClick(Sender: TObject);
+    ActivityIndicator1  : TActivityIndicator;
+    ScrollBox           : TScrollBox;
+    mniYearly           : TMenuItem;
+    lbl_RepoCount       : TLabel;
+    Btn_ChangeLanguage  : TButton;
+    PopupMenuLanguage   : TPopupMenu;
+    mniPascal           : TMenuItem;
+    mniSQL              : TMenuItem;
+    mniC                : TMenuItem;
+    chk_TopTen          : TCheckBox;
+    ControlList1        : TControlList;
+    PopupMenuRepoPanel  : TPopupMenu;
+    mniFavorites        : TMenuItem;
+    chk_favorites       : TCheckBox;
+    procedure mniDailyClick           (Sender: TObject);
+    procedure mniWeeklyClick          (Sender: TObject);
+    procedure mniMonthlyClick         (Sender: TObject);
+    procedure mniYearlyClick          (Sender: TObject);
+    procedure ImgClick                (Sender: TObject);
+    procedure PanelResize             (Sender: TObject);
+    procedure mniPascalClick          (Sender: TObject);
+    procedure mniCClick               (Sender: TObject);
+    procedure mniSQLClick             (Sender: TObject);
+    procedure chk_TopTenClick         (Sender: TObject);
+    procedure PopupMenuRepoPanelPopup (Sender: TObject);
+    procedure mniFavoritesClick       (Sender: TObject);
+    procedure chk_favoritesClick      (Sender: TObject);
   private
     FStylingNotifierIndex: Integer;
-    FPeriod: string;
-    FLanguage: string;
-    FRepositoryList: TList<TRepository>;
-    FStyleNotifier: TStyleNotifier;
+    FPeriod               : string;
+    FLanguage             : string;
+    FRepositoryList       : TList<TRepository>;
+    FStyleNotifier        : TStyleNotifier;
     LastClickedLinkLabelEx: TLinkLabelEx;
-    procedure RefreshList;
-    procedure AddRepository(const AIndex: Integer; const ARepository: TRepository; AThemingEnabled: Boolean; AColor: TColor);
+    procedure AddRepository(const AIndex: Integer;
+                            const ARepository: TRepository;
+                            AThemingEnabled: Boolean;
+                            AColor: TColor);
+    function TruncateTextToFit(ACanvas: TCanvas;
+                               const AText: string;
+                               AMaxWidth: Integer): string;
+    procedure LoadImageFromResource(const AImage: TImage;
+                                    const AResourceName: string);
+    procedure UpdateUI            (AIsEmpty: Boolean = False; AMsg: string = '');
+    procedure ChangePeriod        (const AListType: string);
+    procedure ChangeLanguage      (const ALang: string);
+    function FindAvatarImage      (APanel: TPanel): TImage;
+    procedure AdjustAvatars       (AAvatar: TImage);
+    procedure AdjustRepoLink      (ALink: TLinkLabelEx; AAvatar: TImage);
+    function FindRepoLink         (APanel: TPanel): TLinkLabelEx;
+    procedure SaveToFavorites     (AIndex: Integer);
+    procedure RemoveFromFavorites (AIndex: Integer);
+    function IsAlreadyFavorite    (ALinkLabel: TLinkLabelEx): Boolean;
     procedure LinkLabel_RepositoryLinkClick(Sender: TObject);
-    procedure UpdateUI(AIsEmpty: Boolean = False; AMsg: string = '');
-    procedure ChangePeriod(const AListType: string);
-    procedure ChangeLanguage(const ALang: string);
-    procedure LoadImageFromResource(const AImage: TImage; const AResourceName: string);
-    function TruncateTextToFit(ACanvas: TCanvas; const AText: string; AMaxWidth: Integer): string;
-    function FindAvatarImage(APanel: TPanel): TImage;
-    procedure AdjustAvatars(AAvatar: TImage);
-    procedure AdjustRepoLink(ALink: TLinkLabelEx; AAvatar: TImage);
-    function FindRepoLink(APanel: TPanel): TLinkLabelEx;
-    procedure SaveToFavorites(AIndex: Integer);
-    procedure RemoveFromFavorites(AIndex: Integer);
+    procedure RefreshList;
     function LoadFavorites: Boolean;
-    function IsAlreadyFavorite(ALinkLabel: TLinkLabelEx): Boolean;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -115,9 +146,9 @@ end;
 procedure TMainFrame.PopupMenuRepoPanelPopup(Sender: TObject);
 begin
   LastClickedLinkLabelEx := TPopupMenu(Sender).PopupComponent as TLinkLabelEx;
+
   if IsAlreadyFavorite(LastClickedLinkLabelEx) then
-    mniFavorites.Caption := 'Remove from favorites'
-  else
+    mniFavorites.Caption := 'Remove from favorites' else
     mniFavorites.Caption := 'Add to favorites';
 end;
 
@@ -128,32 +159,32 @@ end;
 
 procedure TMainFrame.PullRepoList;
 var
-  LvJSONResponse: string;
-  LvJSONObj: TJSONObject;
-  LvRepositories: TJSONArray;
-  LvRepo: TJSONObject;
-  LvOwner: TJSONObject;
-  I: Integer;
+  LvJSONResponse  : string;
+  LvJSONObj       : TJSONObject;
+  LvRepositories  : TJSONArray;
+  LvRepo          : TJSONObject;
+  LvOwner         : TJSONObject;
+  I               : Integer;
 begin
   TThread.Synchronize(TThread.Current,
-  procedure
-  begin
-    ActivityIndicator1.Left := (Self.Width div 2) - (ActivityIndicator1.Width div 2);
-    ActivityIndicator1.Top := (Self.Height div 2) - (ActivityIndicator1.Height div 2);
-    ActivityIndicator1.StartAnimation;
-    ActivityIndicator1.Visible := True;
-  end);
+   procedure
+    begin
+     ActivityIndicator1.Left := (Self.Width div 2)   - (ActivityIndicator1.Width div 2);
+     ActivityIndicator1.Top  := (Self.Height div 2)  - (ActivityIndicator1.Height div 2);
+     ActivityIndicator1.StartAnimation;
+     ActivityIndicator1.Visible := True;
+    end);
 
   var LvException: string;
   if not TGitHubHelper.CheckInternetAvailabilityAsync('https://www.github.com', LvException) then
-  begin
-    TThread.Synchronize(TThread.Current, procedure begin UpdateUI(True, LvException); end);
-    Exit;
-  end;
+    begin
+      TThread.Synchronize(TThread.Current, procedure begin UpdateUI(True, LvException); end);
+      Exit;
+    end;
 
   try
     try
-      LvJSONResponse := TGitHubHelper.GetTrendingPascalRepositories(FPeriod, FLanguage);
+     LvJSONResponse := TGitHubHelper.GetTrendingPascalRepositories(FPeriod, FLanguage);
       try
         LvJSONObj := TJSONObject.ParseJSONValue(LvJSONResponse) as TJSONObject;
       except on E: Exception do
@@ -161,35 +192,34 @@ begin
       end;
 
       try
-        if Assigned(LvJSONObj) then
+       if Assigned(LvJSONObj) then
         begin
           FRepositoryList.Clear;
           LvRepositories := LvJSONObj.GetValue<TJSONArray>('items');
 
           var LvRepoCount: Integer;
           if chk_TopTen.Checked then
-            LvRepoCount := Min(9 , LvRepositories.Count - 1)
-          else
+            LvRepoCount := Min(9 , LvRepositories.Count - 1) else
             LvRepoCount := Min(99, LvRepositories.Count - 1);
             
           lbl_RepoCount.Caption := '(' + LvRepoCount.ToString + ')';
           lbl_RepoCount.Align := alRight;
 
-          for I := 0 to LvRepoCount do
+         for I := 0 to LvRepoCount do
           begin
             LvRepo := LvRepositories.Items[I] as TJSONObject;
 
-            if Assigned(LvRepo) then
+           if Assigned(LvRepo) then
             begin
               var LvRepoRec: TRepository;
-              LvRepoRec.RepoName := LvRepo.GetValue<string>('name');
-              LvRepoRec.RepoURL := LvRepo.GetValue<string>('html_url');
+              LvRepoRec.RepoName    := LvRepo.GetValue<string>('name');
+              LvRepoRec.RepoURL     := LvRepo.GetValue<string>('html_url');
               LvRepoRec.Description := LvRepo.GetValue<string>('description');
               LvRepoRec.CreatedDate := LvRepo.GetValue<TDateTime>('created_at');
-              LvRepoRec.Language := LvRepo.GetValue<string>('language');
-              LvRepoRec.StarCount := LvRepo.GetValue<Integer>('stargazers_count');
-              LvRepoRec.ForkCount := LvRepo.GetValue<Integer>('forks');
-              LvRepoRec.IssuCount := LvRepo.GetValue<Integer>('open_issues');
+              LvRepoRec.Language    := LvRepo.GetValue<string>('language');
+              LvRepoRec.StarCount   := LvRepo.GetValue<Integer>('stargazers_count');
+              LvRepoRec.ForkCount   := LvRepo.GetValue<Integer>('forks_count');
+              LvRepoRec.IssuCount   := LvRepo.GetValue<Integer>('open_issues');
 
               LvOwner := LvRepo.GetValue<TJSONObject>('owner');
               if Assigned(LvOwner) then
@@ -216,10 +246,10 @@ end;
 
 procedure TMainFrame.UpdateUI(AIsEmpty: Boolean = False; AMsg: string = '');
 var
-  I: Integer;
-  LvThemingServices: IOTAIDEThemingServices;
-  LvThemingEnabled: Boolean;
-  LvNewColor: TColor;
+  I                 : Integer;
+  LvThemingServices : IOTAIDEThemingServices;
+  LvThemingEnabled  : Boolean;
+  LvNewColor        : TColor;
 begin
   LvThemingEnabled := False;
   ActivityIndicator1.StopAnimation;
@@ -228,37 +258,37 @@ begin
   if AIsEmpty then
   begin
     ClearScrollBox;
-    var LvEmptyLabel := TLabel.Create(Self);
-    LvEmptyLabel.Name := 'emptylabel';
-    LvEmptyLabel.Parent := ScrollBox;
-    LvEmptyLabel.Caption := AMsg;
-    LvEmptyLabel.Alignment := taCenter;
-    LvEmptyLabel.Font.Size := 12;
-    LvEmptyLabel.Align := alTop;
-    LvEmptyLabel.AutoSize := True;
-    LvEmptyLabel.WordWrap := True;
+    var LvEmptyLabel        := TLabel.Create(Self);
+    LvEmptyLabel.Name       := 'emptylabel';
+    LvEmptyLabel.Parent     := ScrollBox;
+    LvEmptyLabel.Caption    := AMsg;
+    LvEmptyLabel.Alignment  := taCenter;
+    LvEmptyLabel.Font.Size  := 12;
+    LvEmptyLabel.Align      := alTop;
+    LvEmptyLabel.AutoSize   := True;
+    LvEmptyLabel.WordWrap   := True;
     Exit;
   end;
 
   // Ascending sort by Star Count
-  FRepositoryList.Sort(TComparer<TRepository>.Construct(
-  function(const Left, Right: TRepository): Integer
-  begin
-    Result := Left.StarCount - Right.StarCount;
-  end));
+  FRepositoryList.Sort(TComparer<TRepository>.Construct
+   (function(const Left, Right: TRepository): Integer
+    begin
+     Result := Left.StarCount - Right.StarCount;
+    end));
 
   if FRepositoryList.Count > 0 then
-  begin
+   begin
     if Supports(BorlandIDEServices, IOTAIDEThemingServices, LvThemingServices) and LvThemingServices.IDEThemingEnabled then
     begin
       LvThemingEnabled := True;
-      LvNewColor := LvThemingServices.StyleServices.GetSystemColor(clWindow);
+      LvNewColor       := LvThemingServices.StyleServices.GetSystemColor(clWindow);
     end;
 
     ClearScrollBox;
     for I := 0 to Pred(FRepositoryList.Count) do
       AddRepository(I, FRepositoryList.Items[I], LvThemingEnabled, LvNewColor);
-  end;
+   end;
 end;
 
 procedure TMainFrame.AdjustAvatars(AAvatar: TImage);
@@ -269,7 +299,7 @@ begin
     procedure
     begin
       AAvatar.Left := ControlList1.Width - AAvatar.Width - 5;
-      AAvatar.Top := 3;
+      AAvatar.Top  := 3;
     end);
   end;
 end;
@@ -430,14 +460,14 @@ end;
 procedure TMainFrame.LinkLabel_RepositoryLinkClick(Sender: TObject);
 begin
   if FRepositoryList.Count > 0 then
-  begin
-    var Url: string;
-    Url := cGitHubURL +'/' + FRepositoryList.Items[TLinkLabel(Sender).Tag].Author + '/' +  FRepositoryList.Items[TLinkLabel(Sender).Tag].RepoName;
+   begin
+    var Url := FRepositoryList.Items[TLinkLabel(Sender).Tag].RepoURL;
+//    Url := cGitHubURL +'/' + FRepositoryList.Items[TLinkLabel(Sender).Tag].Author + '/' +  FRepositoryList.Items[TLinkLabel(Sender).Tag].RepoName;
     ShellExecute(0, 'open', PChar(Url), nil, nil, SW_SHOWNORMAL);
 
-    TLinkLabelEx(Sender).Visited := True;
+    TLinkLabelEx(Sender).Visited    := True;
     TLinkLabelEx(Sender).Font.Color := TLinkLabelEx(Sender).VisitedColor;
-  end;
+   end;
 end;
 
 procedure TMainFrame.mniWeeklyClick(Sender: TObject);
@@ -507,15 +537,15 @@ begin
     LvRepository := FRepositoryList.Items[AIndex];
     if LvRegistry.OpenKey(cBaseKey + '\' + LvRepository.RepoName, True) then
     begin
-      LvRegistry.WriteString('RepoName', LvRepository.RepoName);
-      LvRegistry.WriteString('RepoURL', LvRepository.RepoURL);
-      LvRegistry.WriteString('Author', LvRepository.Author);
-      LvRegistry.WriteString('AvatarUrl', LvRepository.AvatarUrl);
-      LvRegistry.WriteString('Description', LvRepository.Description);
-      LvRegistry.WriteString('Language', LvRepository.Language);
-      LvRegistry.WriteInteger('StarCount', LvRepository.StarCount);
-      LvRegistry.WriteInteger('ForkCount', LvRepository.ForkCount);
-      LvRegistry.WriteInteger('IssuCount', LvRepository.IssuCount);
+      LvRegistry.WriteString('RepoName',      LvRepository.RepoName);
+      LvRegistry.WriteString('RepoURL',       LvRepository.RepoURL);
+      LvRegistry.WriteString('Author',        LvRepository.Author);
+      LvRegistry.WriteString('AvatarUrl',     LvRepository.AvatarUrl);
+      LvRegistry.WriteString('Description',   LvRepository.Description);
+      LvRegistry.WriteString('Language',      LvRepository.Language);
+      LvRegistry.WriteInteger('StarCount',    LvRepository.StarCount);
+      LvRegistry.WriteInteger('ForkCount',    LvRepository.ForkCount);
+      LvRegistry.WriteInteger('IssuCount',    LvRepository.IssuCount);
       LvRegistry.WriteDateTime('CreatedDate', LvRepository.CreatedDate);
       LvRegistry.CloseKey;
       LastClickedLinkLabelEx.FavoriteImage.Visible := True;
@@ -549,259 +579,262 @@ begin
   Result := cNoDescription;
 end;
 
-procedure TMainFrame.AddRepository(const AIndex: Integer; const ARepository: TRepository; AThemingEnabled: Boolean; AColor: TColor);
+procedure TMainFrame.AddRepository(const AIndex: Integer;
+                                   const ARepository: TRepository;
+                                   AThemingEnabled: Boolean;
+                                   AColor: TColor);
 var
   LvPanel: TPanel;
   LvIsSmallTextWith: Boolean;
 begin
-  LvPanel := TPanel.Create(Self);
-  LvPanel.Name := cPanelPrefix + AIndex.ToString;
-  LvPanel.Caption := EmptyStr;
-  LvPanel.Parent := ControlList1;
-  LvPanel.Align := alTop;
-  LvPanel.Height := 88;
-  LvPanel.OnResize := PanelResize;
-  LvPanel.BevelEdges := [];
-  LvPanel.BevelKind := TBevelKind.bkNone;
-  LvPanel.BevelOuter := TBevelCut.bvNone;
+  LvPanel             := TPanel.Create(Self);
+  LvPanel.Name        := cPanelPrefix + AIndex.ToString;
+  LvPanel.Caption     := EmptyStr;
+  LvPanel.Parent      := ControlList1;
+  LvPanel.Align       := alTop;
+  LvPanel.Height      := 88;
+  LvPanel.OnResize    := PanelResize;
+  LvPanel.BevelEdges  := [];
+  LvPanel.BevelKind   := TBevelKind.bkNone;
+  LvPanel.BevelOuter  := TBevelCut.bvNone;
 
   if AThemingEnabled then
   begin
-    LvPanel.StyleElements := LvPanel.StyleElements - [seClient];
-    LvPanel.ParentBackground := False;
-    LvPanel.Color := AColor;
+    LvPanel.StyleElements     := LvPanel.StyleElements - [seClient];
+    LvPanel.ParentBackground  := False;
+    LvPanel.Color             := AColor;
   end;
 
   LvPanel.BorderStyle := bsNone;
   ControlList1.Height := ControlList1.Height + LvPanel.Height;
 
+  //Label Date
   var lbl_Date := TLabel.Create(LvPanel);
-  with lbl_Date do
-  begin
-    Parent := LvPanel;
-    Transparent := True;
-    Name := cDateLabelPrefix + AIndex.ToString;
-    Left := 7;
-    Top := 24;
-    Width := 42;
-    Height := 12;
-    Caption := 'Created at ' + FormatDateTime('dd.mm.yyyy', ARepository.CreatedDate);
-    Font.Charset := DEFAULT_CHARSET;
-    Font.Color := clScrollBar;
-    Font.Height := -11;
-    Font.Name := 'Segoe UI';
-    Font.Style := [];
-    ParentFont := False;
-  end;
-
-  var lbl_Description := TLabel.Create(LvPanel);
-  with lbl_Description do
-  begin
-    Parent := LvPanel;
-    AutoSize := False;
-    Transparent := True;
-    Name := cDescriptionLabelPrefix + AIndex.ToString;
-    Left := 7;
-    Top := 42;
-    Width := ControlList1.Width - 1;
-    if lbl_Description.Canvas.TextWidth(ARepository.Description) <= ControlList1.Width then
+   with lbl_Date do
     begin
+      Parent        := LvPanel;
+      Transparent   := True;
+      Name          := cDateLabelPrefix + AIndex.ToString;
+      Left          := 7;
+      Top           := 24;
+      Width         := 42;
+      Height        := 12;
+      Caption       := 'Created at ' + FormatDateTime('dd.mm.yyyy', ARepository.CreatedDate);
+      Font.Charset  := DEFAULT_CHARSET;
+      Font.Color    := clScrollBar;
+      Font.Height   := -11;
+      Font.Name     := 'Segoe UI';
+      Font.Style    := [];
+      ParentFont    := False;
+    end;
+
+  //Label Description
+  var lbl_Description := TLabel.Create(LvPanel);
+   with lbl_Description do
+   begin
+    Parent      := LvPanel;
+    AutoSize    := False;
+    Transparent := True;
+    Name        := cDescriptionLabelPrefix + AIndex.ToString;
+    Left        := 7;
+    Top         := 42;
+    Width       := ControlList1.Width - 1;
+
+    if lbl_Description.Canvas.TextWidth(ARepository.Description) <= ControlList1.Width then
+     begin
       LvIsSmallTextWith := True;
       Height := 30
-    end
-    else
-    begin
+     end else
+     begin
       LvIsSmallTextWith := False;
       Height := 40;
-    end;
-    WordWrap := True;
-    Caption := TruncateTextToFit(lbl_Description.Canvas, ARepository.Description, (LvPanel.Width * 2) - 36);
-    Hint := ARepository.Description;
-    ShowHint := True;
-  end;
+     end;
 
+    WordWrap  := True;
+    Caption   := TruncateTextToFit(lbl_Description.Canvas,
+                                   ARepository.Description,
+                                   (LvPanel.Width * 2) - 36);
+    Hint      := ARepository.Description;
+    ShowHint  := True;
+   end;
+
+  //Image Stars
   var Img_Stars := TImage.Create(LvPanel);
-  with Img_Stars do
-  begin
-    Parent := LvPanel;
-    Transparent := True;
-    Name := cStarsPrefix + AIndex.ToString;
-    Left := 7;
-    if LvIsSmallTextWith then
-      Top := 60
-    else
-      Top := 70;
+   with Img_Stars do
+    begin
+     Parent       := LvPanel;
+     Transparent  := True;
+     Name         := cStarsPrefix + AIndex.ToString;
+     Left := 7;
+     if LvIsSmallTextWith then
+       Top := 60 else
+       Top := 70;
+     Width := 16;
+     Height := 16;
+     LoadImageFromResource(Img_Stars, 'STAR');
+    end;
 
-    Width := 16;
-    Height := 16;
-    LoadImageFromResource(Img_Stars, 'STAR');
-  end;
-
+  //Label Count Stars
   var lbl_StarCount := TLabel.Create(LvPanel);
-  with lbl_StarCount do
-  begin
-    Parent := LvPanel;
-    Transparent := True;
-    Name := cStarCountPrefix + AIndex.ToString;
-    Left := Img_Stars.Left + Img_Stars.Width + 2;
-    if LvIsSmallTextWith then
-      Top := 62
-    else
-      Top := 72;
+   with lbl_StarCount do
+    begin
+      Parent      := LvPanel;
+      Transparent := True;
+      Name        := cStarCountPrefix + AIndex.ToString;
+      Left        := Img_Stars.Left + Img_Stars.Width + 2;
+      if LvIsSmallTextWith then
+        Top := 62 else
+        Top := 72;
+      Width         := 5;
+      Height        := 12;
+      Caption       := ARepository.StarCount.ToString;
+      Font.Charset  := DEFAULT_CHARSET;
+      Font.Color    := clWindowText;
+      Font.Height   := -9;
+      Font.Name     := 'Segoe UI';
+      Font.Style    := [];
+      ParentFont    := False;
+    end;
 
-    Width := 5;
-    Height := 12;
-    Caption := ARepository.StarCount.ToString;
-    Font.Charset := DEFAULT_CHARSET;
-    Font.Color := clWindowText;
-    Font.Height := -9;
-    Font.Name := 'Segoe UI';
-    Font.Style := [];
-    ParentFont := False;
-  end;
-
+  // Image Fork
   var Img_Fork := TImage.Create(LvPanel);
-  with Img_Fork do
-  begin
-    Parent := LvPanel;
-    Transparent := True;
-    Name := cForkPrefix + AIndex.ToString;
-    Left := lbl_StarCount.Left + lbl_StarCount.Width + 10;
-    if LvIsSmallTextWith then
-      Top := 60
-    else
-      Top := 70;
+   with Img_Fork do
+    begin
+      Parent      := LvPanel;
+      Transparent := True;
+      Name        := cForkPrefix + AIndex.ToString;
+      Left        := lbl_StarCount.Left + lbl_StarCount.Width + 10;
+      if LvIsSmallTextWith then
+        Top  := 60 else
+        Top  := 70;
+      Width  := 17;
+      Height := 16;
+      LoadImageFromResource(Img_Fork, 'FORK');
+    end;
 
-    Width := 17;
-    Height := 16;
-    LoadImageFromResource(Img_Fork, 'FORK');
-  end;
-
+  // Label Fork Count
   var lbl_ForkCount := TLabel.Create(LvPanel);
-  with lbl_ForkCount do
-  begin
-    Parent := LvPanel;
-    Transparent := True;
-    Name := cForkCountPrefix + AIndex.ToString;
-    Left := Img_Fork.Left + Img_Fork.Width + 2;
-    if LvIsSmallTextWith then
-      Top := 62
-    else
-      Top := 72;
+   with lbl_ForkCount do
+    begin
+      Parent      := LvPanel;
+      Transparent := True;
+      Name        := cForkCountPrefix + AIndex.ToString;
+      Left        := Img_Fork.Left + Img_Fork.Width + 2;
+      if LvIsSmallTextWith then
+        Top := 62 else
+        Top := 72;
+      Width         := 5;
+      Height        := 12;
+      Caption       := ARepository.ForkCount.ToString;
+      Font.Charset  := DEFAULT_CHARSET;
+      Font.Color    := clWindowText;
+      Font.Height   := -9;
+      Font.Name     := 'Segoe UI';
+      Font.Style    := [];
+      ParentFont    := False;
+    end;
 
-    Width := 5;
-    Height := 12;
-    Caption := ARepository.ForkCount.ToString;
-    Font.Charset := DEFAULT_CHARSET;
-    Font.Color := clWindowText;
-    Font.Height := -9;
-    Font.Name := 'Segoe UI';
-    Font.Style := [];
-    ParentFont := False;
-  end;
-
+  // Image Opened Issues
   var Img_Issue := TImage.Create(LvPanel);
-  with Img_Issue do
-  begin
-    Parent := LvPanel;
-    Transparent := True;
-    Name := cIssuePrefix + AIndex.ToString;
-    Left := lbl_ForkCount.Left + lbl_ForkCount.Width + 10;
-    if LvIsSmallTextWith then
-      Top := 60
-    else
-      Top := 70;
+   with Img_Issue do
+    begin
+      Parent      := LvPanel;
+      Transparent := True;
+      Name        := cIssuePrefix + AIndex.ToString;
+      Left        := lbl_ForkCount.Left + lbl_ForkCount.Width + 10;
+      if LvIsSmallTextWith then
+        Top   := 60 else
+        Top   := 70;
+      Width   := 17;
+      Height  := 16;
+      LoadImageFromResource(Img_Issue, 'Issue_Opened');
+    end;
 
-    Width := 17;
-    Height := 16;
-    LoadImageFromResource(Img_Issue, 'ISSUE');
-  end;
-
+  // Label Issues Count
   var lbl_IssuCount := TLabel.Create(LvPanel);
-  with lbl_IssuCount do
-  begin
-    Parent := LvPanel;
-    Transparent := True;
-    Name := cIssueCountPrefix + AIndex.ToString;
-    Left := Img_Issue.Left + Img_Issue.Width + 2;
-    if LvIsSmallTextWith then
-      Top := 62
-    else
-      Top := 72;
+   with lbl_IssuCount do
+    begin
+      Parent      := LvPanel;
+      Transparent := True;
+      Name        := cIssueCountPrefix + AIndex.ToString;
+      Left        := Img_Issue.Left + Img_Issue.Width + 2;
+      if LvIsSmallTextWith then
+        Top         := 62 else
+        Top         := 72;
+      Width         := 5;
+      Height        := 12;
+      Caption       := ARepository.IssuCount.ToString;
+      Font.Charset  := DEFAULT_CHARSET;
+      Font.Color    := clWindowText;
+      Font.Height   := -9;
+      Font.Name     := 'Segoe UI';
+      Font.Style    := [];
+      ParentFont    := False;
+    end;
 
-    Width := 5;
-    Height := 12;
-    Caption := ARepository.IssuCount.ToString;
-    Font.Charset := DEFAULT_CHARSET;
-    Font.Color := clWindowText;
-    Font.Height := -9;
-    Font.Name := 'Segoe UI';
-    Font.Style := [];
-    ParentFont := False;
-  end;
-
+  // Link Repository
   var LinkLabel_RepositoryLink := TLinkLabelEx.Create(LvPanel);
-  with LinkLabel_RepositoryLink do
-  begin
-    AutoSize := False;
-    Parent := LvPanel;
-    Name := cLinkLablePrefix + AIndex.ToString;
-    Left := 7;
-    Top := 5;
-    Width := 150;
-    Height := 19;
-    RegistryKeyName := ARepository.RepoName;
-    ListIndex := AIndex;
-    CaptionEx := ARepository.Author + '/' + ARepository.RepoName;
-    TabOrder := 0;
-    ParentColor := False;
-    ParentFont := False;
-    StyleElements := [seBorder];
-    Font.Charset := DEFAULT_CHARSET;
-    Font.Height := -14;
-    Font.Name := 'Segoe UI';
-    Font.Style := [];
+   with LinkLabel_RepositoryLink do
+    begin
+      AutoSize        := False;
+      Parent          := LvPanel;
+      Name            := cLinkLablePrefix + AIndex.ToString;
+      Left            := 7;
+      Top             := 5;
+      Width           := 150;
+      Height          := 19;
+      RegistryKeyName := ARepository.RepoName;
+      ListIndex       := AIndex;
+      CaptionEx       := ARepository.Author + '/' + ARepository.RepoName;
+      TabOrder        := 0;
+      ParentColor     := False;
+      ParentFont      := False;
+      StyleElements   := [seBorder];
+      Font.Charset    := DEFAULT_CHARSET;
+      Font.Height     := -14;
+      Font.Name       := 'Segoe UI';
+      Font.Style      := [];
+      LinkColor       := clMenuHighlight;
+      HoverColor      := clHighlight;
+      VisitedColor    := clGray;
+      OnClick         := LinkLabel_RepositoryLinkClick;
+      PopupMenu       := PopupMenuRepoPanel;
+      Tag             := AIndex;
+    end;
 
-    LinkColor := clMenuHighlight;
-    HoverColor := clHighlight;
-    VisitedColor := clGray;
-    OnClick := LinkLabel_RepositoryLinkClick;
-    PopupMenu := PopupMenuRepoPanel;
-  end;
-
+  // Image Favorite
   var Img_Faveorite := TImage.Create(LvPanel);
-  LinkLabel_RepositoryLink.FavoriteImage := Img_Faveorite;
-  with Img_Faveorite do
-  begin
-    Parent := LvPanel;
-    Transparent := True;
-    Name := cFavoritePrefix + AIndex.ToString;
-    Left := lbl_IssuCount.Left + lbl_IssuCount.Width + 10;
-    if LvIsSmallTextWith then
-      Top := 60
-    else
-      Top := 70;
+   LinkLabel_RepositoryLink.FavoriteImage := Img_Faveorite;
+   with Img_Faveorite do
+    begin
+      Parent      := LvPanel;
+      Transparent := True;
+      Name        := cFavoritePrefix + AIndex.ToString;
+      Left        := lbl_IssuCount.Left + lbl_IssuCount.Width + 10;
+      if LvIsSmallTextWith then
+        Top   := 60 else
+        Top   := 70;
+      Width   := 17;
+      Height  := 16;
+      LoadImageFromResource(Img_Faveorite, 'FAV');
+      Visible := IsAlreadyFavorite(LinkLabel_RepositoryLink);
+    end;
 
-    Width := 17;
-    Height := 16;
-    LoadImageFromResource(Img_Faveorite, 'FAV');
-    Visible := IsAlreadyFavorite(LinkLabel_RepositoryLink);
-  end;
-
+  // Image Avatar
   var Img_Avatar := TImage.Create(Self);
-  with Img_Avatar do
-  begin
-    Parent := LvPanel;
-    Name := cAvatarPrefix + AIndex.ToString;
-    Cursor := crHandPoint;
-    Height := 35;
-    Width := 35;
-    Stretch := True;
-    LoadImageFromURL(ARepository.AvatarUrl);
-    Tag := AIndex;
-    OnClick := ImgClick;
-    Hint := ARepository.Author;
-  end;
+   with Img_Avatar do
+    begin
+      Parent := LvPanel;
+      Name := cAvatarPrefix + AIndex.ToString;
+      Cursor := crHandPoint;
+      Height := 35;
+      Width := 35;
+      Stretch := True;
+      LoadImageFromURL(ARepository.AvatarUrl);
+      Tag := AIndex;
+      OnClick := ImgClick;
+      Hint := ARepository.Author;
+    end;
 
   AdjustAvatars(Img_Avatar);
   AdjustRepoLink(LinkLabel_RepositoryLink, Img_Avatar);
