@@ -3,13 +3,24 @@ unit WP.GitHub.Helper;
 interface
 
 uses
-  System.SysUtils, System.Classes, System.JSON, System.Net.HttpClient,
-  System.Net.URLClient, System.Net.HttpClientComponent, System.StrUtils,
-  System.DateUtils, System.TimeSpan, Vcl.ExtCtrls, Vcl.Graphics,
-  Vcl.Imaging.pngimage, System.Types, Vcl.Dialogs;
+  System.Classes,
+  System.DateUtils,
+  System.JSON,
+  System.Net.HttpClient,
+  System.Net.HttpClientComponent,
+  System.Net.URLClient,
+  System.StrUtils,
+  System.SysUtils,
+  System.TimeSpan,
+  System.Types,
+  Vcl.Dialogs,
+  Vcl.ExtCtrls,
+  Vcl.Graphics,
+  Vcl.Imaging.pngimage;
 
 const
-  cURL = 'https://api.github.com/search/repositories?q=language:%s+created:%s&sort=stars&order=desc&per_page=101&page=1';
+  cURL =
+  'https://api.github.com/search/repositories?q=language:%s+created:%s&sort=stars&order=desc&per_page=101&page=1';
   cBaseKey = '\Software\GithubTrendingsPlugin';
 type
   TGitHubHelper = class
@@ -17,8 +28,10 @@ type
     class function DateTimeToISO8601(const ADateTime: TDateTime): string;
     class function GetPeriodRange(const APeriod: string): string;
   public
-    class function GetTrendingPascalRepositories(const APeriod: string; const ALanguage: string): string;
-    class function CheckInternetAvailabilityAsync(const URL: string; var AException: string): Boolean; static;
+    class function GetTrendingPascalRepositories(const APeriod  : string;
+                                                 const ALanguage: string): string;
+    class function CheckInternetAvailabilityAsync(const URL: string;
+                                                  var AException: string): Boolean; static;
   end;
 
   TImageHelper = class helper for TImage
@@ -28,34 +41,33 @@ type
 
 implementation
 
-{ TGitHubHelper }
 class function TGitHubHelper.DateTimeToISO8601(const ADateTime: TDateTime): string;
 var
-  TZ: TTimeZone;
+  TZ    : TTimeZone;
   Offset: TTimeSpan;
-  Hours, Mins: string;
+  Hours : string;
+  Mins  : string;
 begin
   // Convert TDateTime to UTC-based ISO 8601 format
   Result := FormatDateTime('yyyy-mm-dd"T"hh:nn:ss', ADateTime);
 
   // Get local time zone information
-  TZ := TTimeZone.Local;
-  Offset := TZ.GetUtcOffset(ADateTime);
+  TZ      := TTimeZone.Local;
+  Offset  := TZ.GetUtcOffset(ADateTime);
 
   // Check if the time is in UTC
   if Offset = TTimeSpan.Zero then
-    Result := Result + 'Z'  // UTC time
+     Result := Result + 'Z'  // UTC time
   else
   begin
     // Extract hours and minutes from TTimeSpan
     Hours := Format('%.*d', [2, Abs(Offset.Hours)]);  // Hours
-    Mins := Format('%.*d', [2, Abs(Offset.Minutes)]); // Minutes
+    Mins  := Format('%.*d', [2, Abs(Offset.Minutes)]); // Minutes
 
     // Add the time zone offset in ISO 8601 format
     if Offset.TotalHours >= 0 then
-      Result := Result + '%2B' + Hours + ':' + Mins
-    else
-      Result := Result + '-' + Hours + ':' + Mins;
+      Result := Result + '%2B' + Hours + ':' + Mins else
+      Result := Result + '-'   + Hours + ':' + Mins;
   end;
 end;
 
@@ -71,7 +83,7 @@ begin
     2: FromDate := IncDay(ToDate, -30);   // 30 days ago
     3: FromDate := IncDay(ToDate, -365);  // 365 days ago
   else
-    FromDate := IncHour(ToDate, -24);  // 24 hours ago
+    FromDate := IncHour(ToDate, -24);     // 24 hours ago
   end;
 
   Result := DateTimeToISO8601(FromDate) + '..' + DateTimeToISO8601(ToDate);
@@ -80,20 +92,19 @@ end;
 class function TGitHubHelper.GetTrendingPascalRepositories(const APeriod: string; const ALanguage: string): string;
 var
   HTTPClient: TNetHTTPClient;
-  Response: IHTTPResponse;
-  URL: string;
+  Response  : IHTTPResponse;
+  URL       : string;
 begin
   if IndexStr(APeriod.ToLower, ['daily', 'weekly', 'monthly', 'yearly']) = -1 then
     raise Exception.Create('Invalid PeriodType. Must be "daily", "weekly", "monthly", or "yearly".');
 
-  URL := Format(cURL, [ALanguage, GetPeriodRange(APeriod.ToLower)]);
+  URL        := Format(cURL, [ALanguage, GetPeriodRange(APeriod.ToLower)]);
   HTTPClient := TNetHTTPClient.Create(nil);
   try
     Response := HTTPClient.Get(URL);
     if Response.StatusCode = 200 then
-      Result := Response.ContentAsString
-    else
-      raise Exception.CreateFmt('Error: %d - %s', [Response.StatusCode, Response.StatusText]);
+     Result := Response.ContentAsString else
+     raise Exception.CreateFmt('Error: %d - %s', [Response.StatusCode, Response.StatusText]);
   finally
     HTTPClient.Free;
   end;
@@ -103,11 +114,11 @@ class function TGitHubHelper.CheckInternetAvailabilityAsync(const URL: string; v
 var
   HttpClient: THttpClient;
 begin
-  Result := False;
-  HttpClient := THttpClient.Create;
-  HttpClient.ConnectionTimeout := 2000;
-  HttpClient.SendTimeout := 2000;
-  HttpClient.ResponseTimeout := 2000;
+  Result                        := False;
+  HttpClient                    := THttpClient.Create;
+  HttpClient.ConnectionTimeout  := 2000;
+  HttpClient.SendTimeout        := 2000;
+  HttpClient.ResponseTimeout    := 2000;
   try
     try
       HttpClient.Head(URL);
@@ -115,15 +126,15 @@ begin
     except on E: Exception do
       begin
         Result := False;
-        AException := 'No internet connection.' + sLineBreak + sLineBreak + 'Exception: ' + sLineBreak + E.Message;
+        AException := 'No internet connection.'
+                      + sLineBreak + sLineBreak + 'Exception: '
+                      + sLineBreak + E.Message;
       end;
     end;
   finally
     HttpClient.Free;
   end;
 end;
-
-{ TImaheHelper }
 
 procedure TImageHelper.LoadImageFromURL(const AImageURL: string);
 var
@@ -151,7 +162,7 @@ begin
           procedure
           begin
             Self.Picture := nil;
-            Self.Hint := Format('Failed to load image. Status code: %d', [Response.StatusCode]);
+            Self.Hint    := Format('Failed to load image. Status code: %d', [Response.StatusCode]);
           end);
         end;
       finally

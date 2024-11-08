@@ -3,19 +3,24 @@ unit WP.GitHub.LinkLabelEx;
 interface
 
 uses
-  System.Classes, Vcl.Controls, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.Graphics,
-  Winapi.Messages, System.SysUtils;
+  System.Classes,
+  System.SysUtils,
+  Vcl.Controls,
+  Vcl.ExtCtrls,
+  Vcl.Graphics,
+  Vcl.StdCtrls,
+  Winapi.Messages;
 
 type
   TLinkLabelEx = class(TLabel)
   private
-    FLinkColor: TColor;
-    FHoverColor: TColor;
-    FVisitedColor: TColor;
-    FVisited: Boolean;
+    FLinkColor      : TColor;
+    FHoverColor     : TColor;
+    FVisitedColor   : TColor;
+    FVisited        : Boolean;
     FRegistryKeyName: string;
-    FListIndex: Integer;
-    FFavoriteImage: TImage;
+    FListIndex      : Integer;
+    FFavoriteImage  : TImage;
     procedure SetLinkColor(const Value: TColor);
     procedure SetHoverColor(const Value: TColor);
     procedure SetVisitedColor(const Value: TColor);
@@ -27,27 +32,26 @@ type
   public
     constructor Create(AOwner: TComponent); override;
   published
-    property Visited: Boolean read FVisited write FVisited;
-    property LinkColor: TColor read FLinkColor write SetLinkColor default clBlue;
-    property HoverColor: TColor read FHoverColor write SetHoverColor default clRed;
-    property VisitedColor: TColor read FVisitedColor write SetVisitedColor default clPurple;
-    property CaptionEx: TCaption write SetCaptionEx;
-    property RegistryKeyName: string read FRegistryKeyName write FRegistryKeyName;
-    property ListIndex: Integer read FListIndex write FListIndex;
-    property FavoriteImage: TImage read FFavoriteImage write FFavoriteImage;
+    property Visited        : Boolean   read FVisited write FVisited;
+    property LinkColor      : TColor    read FLinkColor write SetLinkColor default clBlue;
+    property HoverColor     : TColor    read FHoverColor write SetHoverColor default clRed;
+    property VisitedColor   : TColor    read FVisitedColor write SetVisitedColor default clPurple;
+    property CaptionEx      : TCaption  write SetCaptionEx;
+    property RegistryKeyName: string    read FRegistryKeyName write FRegistryKeyName;
+    property ListIndex      : Integer   read FListIndex write FListIndex;
+    property FavoriteImage  : TImage    read FFavoriteImage write FFavoriteImage;
   end;
 
 implementation
 
-{ TLinkLabelEx }
 constructor TLinkLabelEx.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  FLinkColor := clBlue;
-  FHoverColor := clRed;
+  FLinkColor    := clBlue;
+  FHoverColor   := clRed;
   FVisitedColor := clPurple;
-  Font.Color := FLinkColor;
-  FVisited := False;
+  Font.Color    := FLinkColor;
+  FVisited      := False;
 end;
 
 procedure TLinkLabelEx.SetLinkColor(const Value: TColor);
@@ -103,8 +107,8 @@ end;
 procedure TLinkLabelEx.DoLinkClick;
 begin
   inherited;
-  FVisited := True;
-  Font.Color := FVisitedColor;
+  FVisited    := True;
+  Font.Color  := FVisitedColor;
 end;
 
 end.
