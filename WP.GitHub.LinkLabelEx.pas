@@ -13,6 +13,9 @@ type
     FHoverColor: TColor;
     FVisitedColor: TColor;
     FVisited: Boolean;
+    FRegistryKeyName: string;
+    FListIndex: Integer;
+    FFavoriteImage: TImage;
     procedure SetLinkColor(const Value: TColor);
     procedure SetHoverColor(const Value: TColor);
     procedure SetVisitedColor(const Value: TColor);
@@ -29,6 +32,9 @@ type
     property HoverColor: TColor read FHoverColor write SetHoverColor default clRed;
     property VisitedColor: TColor read FVisitedColor write SetVisitedColor default clPurple;
     property CaptionEx: TCaption write SetCaptionEx;
+    property RegistryKeyName: string read FRegistryKeyName write FRegistryKeyName;
+    property ListIndex: Integer read FListIndex write FListIndex;
+    property FavoriteImage: TImage read FFavoriteImage write FFavoriteImage;
   end;
 
 implementation

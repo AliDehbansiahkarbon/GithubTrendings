@@ -23,6 +23,7 @@ const
   cIssuePrefix = 'Img_Issue_';
   cIssueCountPrefix = 'lbl_IssueCount_';
   cLinkLablePrefix = 'LinkLabel_RepositoryLink_';
+  cFavoritePrefix = 'Img_Favorite_';
 
   cGitHubURL = 'https://github.com';
 

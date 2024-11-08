@@ -29,13 +29,12 @@ object MainFrame: TMainFrame
       30)
     object lbl_RepoCount: TLabel
       AlignWithMargins = True
-      Left = 322
-      Top = 14
+      Left = 354
+      Top = 6
       Width = 3
       Height = 15
       Anchors = [akRight, akBottom]
       Layout = tlCenter
-      ExplicitTop = 10
     end
     object Btn_LoadRepositories: TButton
       AlignWithMargins = True
@@ -71,6 +70,17 @@ object MainFrame: TMainFrame
       Caption = 'Top10'
       TabOrder = 2
       OnClick = chk_TopTenClick
+    end
+    object chk_favorites: TCheckBox
+      AlignWithMargins = True
+      Left = 205
+      Top = 3
+      Width = 76
+      Height = 24
+      Align = alLeft
+      Caption = 'Favorites'
+      TabOrder = 3
+      OnClick = chk_favoritesClick
     end
   end
   object ScrollBox: TScrollBox
@@ -116,8 +126,8 @@ object MainFrame: TMainFrame
     IndicatorSize = aisXLarge
   end
   object PopupMenuPeriod: TPopupMenu
-    Left = 54
-    Top = 252
+    Left = 62
+    Top = 244
     object mniDaily: TMenuItem
       Caption = 'Daily'
       OnClick = mniDailyClick
@@ -149,6 +159,15 @@ object MainFrame: TMainFrame
     object mniSQL: TMenuItem
       Caption = 'SQL'
       OnClick = mniSQLClick
+    end
+  end
+  object PopupMenuRepoPanel: TPopupMenu
+    OnPopup = PopupMenuRepoPanelPopup
+    Left = 64
+    Top = 320
+    object mniFavorites: TMenuItem
+      Caption = 'Add To Favorites'
+      OnClick = mniFavoritesClick
     end
   end
 end

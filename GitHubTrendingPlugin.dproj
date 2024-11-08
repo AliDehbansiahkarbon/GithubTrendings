@@ -138,6 +138,10 @@
             <ResourceType>BITMAP</ResourceType>
             <ResourceId>ISSUE</ResourceId>
         </RcItem>
+        <RcItem Include="Resources\Fav.bmp">
+            <ResourceType>BITMAP</ResourceType>
+            <ResourceId>FAV</ResourceId>
+        </RcItem>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
@@ -159,6 +163,7 @@
                     <Source Name="MainSource">GitHubTrendingPlugin.dpk</Source>
                 </Source>
                 <Excluded_Packages>
+                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\GitHubTrendingPlugin290.bpl">Ali Dehbansiahkarbon.(adehban@gmail.com)</Excluded_Packages>
                     <Excluded_Packages Name="C:\Program Files (x86)\Raize\CS5\Bin\CodeSiteLoggingPkg_Design290.bpl">CodeSite Studio 5.4.2 - Logging Components</Excluded_Packages>
                     <Excluded_Packages Name="C:\Program Files (x86)\Raize\CS5\Bin\CodeSiteDBToolsPkg_Design290.bpl">CodeSite Studio 5.4.2 - DB Tools</Excluded_Packages>
                     <Excluded_Packages Name="$(BDSBIN)\dcloffice2k290.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>

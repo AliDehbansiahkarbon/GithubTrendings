@@ -9,7 +9,7 @@ uses
   System.Net.HttpClientComponent, WP.GitHub.Helper, System.Threading, Vcl.WinXCtrls, Winapi.ShellAPI,
   Vcl.Themes, ToolsAPI, Vcl.Imaging.jpeg, Vcl.GraphUtil, System.Generics.Defaults,
   System.Math, WP.GitHub.LinkLabelEx, Vcl.Imaging.pngimage, WP.GitHub.Constants,
-  Vcl.ControlList;
+  Vcl.ControlList, System.Win.Registry;
 
 type
   TStyleNotifier = class(TNotifierObject, INTAIDEThemingServicesNotifier)
@@ -49,6 +49,9 @@ type
     mniC: TMenuItem;
     chk_TopTen: TCheckBox;
     ControlList1: TControlList;
+    PopupMenuRepoPanel: TPopupMenu;
+    mniFavorites: TMenuItem;
+    chk_favorites: TCheckBox;
     procedure mniDailyClick(Sender: TObject);
     procedure mniWeeklyClick(Sender: TObject);
     procedure mniMonthlyClick(Sender: TObject);
@@ -59,14 +62,18 @@ type
     procedure mniCClick(Sender: TObject);
     procedure mniSQLClick(Sender: TObject);
     procedure chk_TopTenClick(Sender: TObject);
+    procedure PopupMenuRepoPanelPopup(Sender: TObject);
+    procedure mniFavoritesClick(Sender: TObject);
+    procedure chk_favoritesClick(Sender: TObject);
   private
     FStylingNotifierIndex: Integer;
     FPeriod: string;
     FLanguage: string;
     FRepositoryList: TList<TRepository>;
     FStyleNotifier: TStyleNotifier;
+    LastClickedLinkLabelEx: TLinkLabelEx;
     procedure RefreshList;
-    procedure AddRepository(const AIndex: string; const ARepository: TRepository; AThemingEnabled: Boolean; AColor: TColor);
+    procedure AddRepository(const AIndex: Integer; const ARepository: TRepository; AThemingEnabled: Boolean; AColor: TColor);
     procedure LinkLabel_RepositoryLinkClick(Sender: TObject);
     procedure UpdateUI(AIsEmpty: Boolean = False; AMsg: string = '');
     procedure ChangePeriod(const AListType: string);
@@ -77,6 +84,10 @@ type
     procedure AdjustAvatars(AAvatar: TImage);
     procedure AdjustRepoLink(ALink: TLinkLabelEx; AAvatar: TImage);
     function FindRepoLink(APanel: TPanel): TLinkLabelEx;
+    procedure SaveToFavorites(AIndex: Integer);
+    procedure RemoveFromFavorites(AIndex: Integer);
+    function LoadFavorites: Boolean;
+    function IsAlreadyFavorite(ALinkLabel: TLinkLabelEx): Boolean;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -99,6 +110,15 @@ begin
   var Avatar := FindAvatarImage(TPanel(Sender));
   AdjustAvatars(Avatar);
   AdjustRepoLink(FindRepoLink(TPanel(Sender)), Avatar);
+end;
+
+procedure TMainFrame.PopupMenuRepoPanelPopup(Sender: TObject);
+begin
+  LastClickedLinkLabelEx := TPopupMenu(Sender).PopupComponent as TLinkLabelEx;
+  if IsAlreadyFavorite(LastClickedLinkLabelEx) then
+    mniFavorites.Caption := 'Remove from favorites'
+  else
+    mniFavorites.Caption := 'Add to favorites';
 end;
 
 procedure TMainFrame.mniSQLClick(Sender: TObject);
@@ -148,10 +168,11 @@ begin
 
           var LvRepoCount: Integer;
           if chk_TopTen.Checked then
-            LvRepoCount := 10
+            LvRepoCount := Min(9 , LvRepositories.Count - 1)
           else
-            LvRepoCount := Min(100, LvRepositories.Count - 1);
-          lbl_RepoCount.Caption := '(Count: ' + LvRepoCount.ToString + ')';
+            LvRepoCount := Min(99, LvRepositories.Count - 1);
+            
+          lbl_RepoCount.Caption := '(' + LvRepoCount.ToString + ')';
           lbl_RepoCount.Align := alRight;
 
           for I := 0 to LvRepoCount do
@@ -236,7 +257,7 @@ begin
 
     ClearScrollBox;
     for I := 0 to Pred(FRepositoryList.Count) do
-      AddRepository(I.ToString, FRepositoryList.Items[I], LvThemingEnabled, LvNewColor);
+      AddRepository(I, FRepositoryList.Items[I], LvThemingEnabled, LvNewColor);
   end;
 end;
 
@@ -282,6 +303,23 @@ begin
   RefreshList;
 end;
 
+procedure TMainFrame.chk_favoritesClick(Sender: TObject);
+begin
+  if chk_favorites.Checked then
+  begin
+    try
+      LoadFavorites;
+    except on E: Exception do
+      begin
+        chk_favorites.Checked := False;
+        UpdateUI(True, E.Message);
+      end;
+    end;
+  end
+  else
+    PullRepoList;
+end;
+
 procedure TMainFrame.chk_TopTenClick(Sender: TObject);
 begin
   RefreshList;
@@ -313,6 +351,7 @@ end;
 constructor TMainFrame.Create(AOwner: TComponent);
 begin
   inherited;
+  LastClickedLinkLabelEx := nil;
   FStyleNotifier := TStyleNotifier.Create;
   FStylingNotifierIndex := (BorlandIDEServices as IOTAIDEThemingServices).AddNotifier(FStyleNotifier);
   (BorlandIDEServices as IOTAIDEThemingServices).ApplyTheme(Self);
@@ -374,6 +413,20 @@ begin
   end;
 end;
 
+function TMainFrame.IsAlreadyFavorite(ALinkLabel: TLinkLabelEx): Boolean;
+var
+  LvRegistry: TRegistry;
+begin
+  LvRegistry := TRegistry.Create;
+  try
+    LvRegistry.RootKey := HKEY_CURRENT_USER;
+    Result := LvRegistry.KeyExists(cBaseKey + '\' + ALinkLabel.RegistryKeyName);
+    LvRegistry.CloseKey;
+  finally
+    LvRegistry.Free;
+  end;
+end;
+
 procedure TMainFrame.LinkLabel_RepositoryLinkClick(Sender: TObject);
 begin
   if FRepositoryList.Count > 0 then
@@ -412,9 +465,64 @@ begin
   ChangePeriod(cDaily)
 end;
 
+procedure TMainFrame.mniFavoritesClick(Sender: TObject);
+begin
+  if IsAlreadyFavorite(LastClickedLinkLabelEx) then
+    RemoveFromFavorites(LastClickedLinkLabelEx.ListIndex)
+  else
+    SaveToFavorites(LastClickedLinkLabelEx.ListIndex);
+end;
+
 procedure TMainFrame.RefreshList;
 begin
   TTask.Run(procedure begin PullRepoList; end);
+end;
+
+procedure TMainFrame.RemoveFromFavorites(AIndex: Integer);
+var
+  LvRegistry: TRegistry;
+begin
+  LvRegistry := TRegistry.Create;
+  try
+    LvRegistry.RootKey := HKEY_CURRENT_USER;
+    if LvRegistry.KeyExists(cBaseKey + '\' + FRepositoryList.Items[AIndex].RepoName) then
+    begin
+      LvRegistry.DeleteKey(cBaseKey + '\' + FRepositoryList.Items[AIndex].RepoName);
+      LvRegistry.CloseKey;
+      LastClickedLinkLabelEx.FavoriteImage.Visible := False;
+    end;
+  finally
+    LvRegistry.Free;
+  end;
+end;
+
+procedure TMainFrame.SaveToFavorites(AIndex: Integer);
+var
+  LvRegistry: TRegistry;
+  LvRepository: TRepository;
+begin
+  LvRegistry := TRegistry.Create;
+  try
+    LvRegistry.RootKey := HKEY_CURRENT_USER;
+    LvRepository := FRepositoryList.Items[AIndex];
+    if LvRegistry.OpenKey(cBaseKey + '\' + LvRepository.RepoName, True) then
+    begin
+      LvRegistry.WriteString('RepoName', LvRepository.RepoName);
+      LvRegistry.WriteString('RepoURL', LvRepository.RepoURL);
+      LvRegistry.WriteString('Author', LvRepository.Author);
+      LvRegistry.WriteString('AvatarUrl', LvRepository.AvatarUrl);
+      LvRegistry.WriteString('Description', LvRepository.Description);
+      LvRegistry.WriteString('Language', LvRepository.Language);
+      LvRegistry.WriteInteger('StarCount', LvRepository.StarCount);
+      LvRegistry.WriteInteger('ForkCount', LvRepository.ForkCount);
+      LvRegistry.WriteInteger('IssuCount', LvRepository.IssuCount);
+      LvRegistry.WriteDateTime('CreatedDate', LvRepository.CreatedDate);
+      LvRegistry.CloseKey;
+      LastClickedLinkLabelEx.FavoriteImage.Visible := True;
+    end;
+  finally
+    LvRegistry.Free;
+  end;
 end;
 
 function TMainFrame.TruncateTextToFit(ACanvas: TCanvas; const AText: string; AMaxWidth: Integer): string;
@@ -441,16 +549,17 @@ begin
   Result := cNoDescription;
 end;
 
-procedure TMainFrame.AddRepository(const AIndex: string; const ARepository: TRepository; AThemingEnabled: Boolean; AColor: TColor);
+procedure TMainFrame.AddRepository(const AIndex: Integer; const ARepository: TRepository; AThemingEnabled: Boolean; AColor: TColor);
 var
   LvPanel: TPanel;
+  LvIsSmallTextWith: Boolean;
 begin
   LvPanel := TPanel.Create(Self);
-  LvPanel.Name := cPanelPrefix + AIndex;
+  LvPanel.Name := cPanelPrefix + AIndex.ToString;
   LvPanel.Caption := EmptyStr;
   LvPanel.Parent := ControlList1;
   LvPanel.Align := alTop;
-  LvPanel.Height := 85;
+  LvPanel.Height := 88;
   LvPanel.OnResize := PanelResize;
   LvPanel.BevelEdges := [];
   LvPanel.BevelKind := TBevelKind.bkNone;
@@ -471,7 +580,7 @@ begin
   begin
     Parent := LvPanel;
     Transparent := True;
-    Name := cDateLabelPrefix + AIndex;
+    Name := cDateLabelPrefix + AIndex.ToString;
     Left := 7;
     Top := 24;
     Width := 42;
@@ -491,16 +600,22 @@ begin
     Parent := LvPanel;
     AutoSize := False;
     Transparent := True;
-    Name := cDescriptionLabelPrefix + AIndex;
+    Name := cDescriptionLabelPrefix + AIndex.ToString;
     Left := 7;
     Top := 42;
     Width := ControlList1.Width - 1;
     if lbl_Description.Canvas.TextWidth(ARepository.Description) <= ControlList1.Width then
+    begin
+      LvIsSmallTextWith := True;
       Height := 30
+    end
     else
+    begin
+      LvIsSmallTextWith := False;
       Height := 40;
+    end;
     WordWrap := True;
-    Caption := TruncateTextToFit(lbl_Description.Canvas, ARepository.Description, (LvPanel.Width * 2) - 20);
+    Caption := TruncateTextToFit(lbl_Description.Canvas, ARepository.Description, (LvPanel.Width * 2) - 36);
     Hint := ARepository.Description;
     ShowHint := True;
   end;
@@ -510,9 +625,9 @@ begin
   begin
     Parent := LvPanel;
     Transparent := True;
-    Name := cStarsPrefix + AIndex;
+    Name := cStarsPrefix + AIndex.ToString;
     Left := 7;
-    if lbl_Description.Canvas.TextWidth(ARepository.Description) <= ControlList1.Width then
+    if LvIsSmallTextWith then
       Top := 60
     else
       Top := 70;
@@ -527,9 +642,9 @@ begin
   begin
     Parent := LvPanel;
     Transparent := True;
-    Name := cStarCountPrefix + AIndex;
+    Name := cStarCountPrefix + AIndex.ToString;
     Left := Img_Stars.Left + Img_Stars.Width + 2;
-    if lbl_Description.Canvas.TextWidth(ARepository.Description) <= ControlList1.Width then
+    if LvIsSmallTextWith then
       Top := 62
     else
       Top := 72;
@@ -550,9 +665,9 @@ begin
   begin
     Parent := LvPanel;
     Transparent := True;
-    Name := cForkPrefix + AIndex;
+    Name := cForkPrefix + AIndex.ToString;
     Left := lbl_StarCount.Left + lbl_StarCount.Width + 10;
-    if lbl_Description.Canvas.TextWidth(ARepository.Description) <= ControlList1.Width then
+    if LvIsSmallTextWith then
       Top := 60
     else
       Top := 70;
@@ -567,9 +682,9 @@ begin
   begin
     Parent := LvPanel;
     Transparent := True;
-    Name := cForkCountPrefix + AIndex;
+    Name := cForkCountPrefix + AIndex.ToString;
     Left := Img_Fork.Left + Img_Fork.Width + 2;
-    if lbl_Description.Canvas.TextWidth(ARepository.Description) <= ControlList1.Width then
+    if LvIsSmallTextWith then
       Top := 62
     else
       Top := 72;
@@ -590,9 +705,9 @@ begin
   begin
     Parent := LvPanel;
     Transparent := True;
-    Name := cIssuePrefix + AIndex;
+    Name := cIssuePrefix + AIndex.ToString;
     Left := lbl_ForkCount.Left + lbl_ForkCount.Width + 10;
-    if lbl_Description.Canvas.TextWidth(ARepository.Description) <= ControlList1.Width then
+    if LvIsSmallTextWith then
       Top := 60
     else
       Top := 70;
@@ -607,9 +722,9 @@ begin
   begin
     Parent := LvPanel;
     Transparent := True;
-    Name := cIssueCountPrefix + AIndex;
+    Name := cIssueCountPrefix + AIndex.ToString;
     Left := Img_Issue.Left + Img_Issue.Width + 2;
-    if lbl_Description.Canvas.TextWidth(ARepository.Description) <= ControlList1.Width then
+    if LvIsSmallTextWith then
       Top := 62
     else
       Top := 72;
@@ -630,18 +745,18 @@ begin
   begin
     AutoSize := False;
     Parent := LvPanel;
-    Name := cLinkLablePrefix + AIndex;
+    Name := cLinkLablePrefix + AIndex.ToString;
     Left := 7;
     Top := 5;
     Width := 150;
     Height := 19;
-    Tag := AIndex.ToInteger;
+    RegistryKeyName := ARepository.RepoName;
+    ListIndex := AIndex;
     CaptionEx := ARepository.Author + '/' + ARepository.RepoName;
     TabOrder := 0;
     ParentColor := False;
     ParentFont := False;
     StyleElements := [seBorder];
-
     Font.Charset := DEFAULT_CHARSET;
     Font.Height := -14;
     Font.Name := 'Segoe UI';
@@ -651,19 +766,39 @@ begin
     HoverColor := clHighlight;
     VisitedColor := clGray;
     OnClick := LinkLabel_RepositoryLinkClick;
+    PopupMenu := PopupMenuRepoPanel;
+  end;
+
+  var Img_Faveorite := TImage.Create(LvPanel);
+  LinkLabel_RepositoryLink.FavoriteImage := Img_Faveorite;
+  with Img_Faveorite do
+  begin
+    Parent := LvPanel;
+    Transparent := True;
+    Name := cFavoritePrefix + AIndex.ToString;
+    Left := lbl_IssuCount.Left + lbl_IssuCount.Width + 10;
+    if LvIsSmallTextWith then
+      Top := 60
+    else
+      Top := 70;
+
+    Width := 17;
+    Height := 16;
+    LoadImageFromResource(Img_Faveorite, 'FAV');
+    Visible := IsAlreadyFavorite(LinkLabel_RepositoryLink);
   end;
 
   var Img_Avatar := TImage.Create(Self);
   with Img_Avatar do
   begin
     Parent := LvPanel;
-    Name := cAvatarPrefix + AIndex;
+    Name := cAvatarPrefix + AIndex.ToString;
     Cursor := crHandPoint;
     Height := 35;
     Width := 35;
     Stretch := True;
     LoadImageFromURL(ARepository.AvatarUrl);
-    Tag := AIndex.ToInteger;
+    Tag := AIndex;
     OnClick := ImgClick;
     Hint := ARepository.Author;
   end;
@@ -677,6 +812,62 @@ begin
   AImage.Picture.Bitmap.LoadFromResourceName(HInstance, AResourceName);
   AImage.Stretch := True;
   AImage.Proportional := True;
+end;
+
+function TMainFrame.LoadFavorites: Boolean;
+var
+  LvRegistry: TRegistry;
+  LvRepository: TRepository;
+  LvTempList: TStringList;
+  I: Integer;
+begin
+  Result := False;
+  LvRegistry := TRegistry.Create;
+  try
+    LvRegistry.RootKey := HKEY_CURRENT_USER;
+    if LvRegistry.OpenKeyReadOnly(cBaseKey) then
+    begin
+      LvTempList:= TStringList.Create;
+      try
+        LvRegistry.GetKeyNames(LvTempList);
+
+        if LvTempList.IsEmpty then
+          UpdateUI(True, 'Favorite list is empty.')
+        else
+        begin
+          FRepositoryList.Clear;
+
+          for var LvRepoName in LvTempList do
+          begin
+            if LvRegistry.OpenKeyReadOnly(cBaseKey + '\' + LvRepoName.Trim) then
+            begin
+              LvRepository := Default(TRepository);
+
+              LvRepository.RepoName := LvRegistry.ReadString('RepoName');
+              LvRepository.RepoURL := LvRegistry.ReadString('RepoURL');
+              LvRepository.Author := LvRegistry.ReadString('Author');
+              LvRepository.AvatarUrl := LvRegistry.ReadString('AvatarUrl');
+              LvRepository.Description := LvRegistry.ReadString('Description');
+              LvRepository.Language := LvRegistry.ReadString('Language');
+              LvRepository.StarCount := LvRegistry.ReadInteger('StarCount');
+              LvRepository.ForkCount := LvRegistry.ReadInteger('ForkCount');
+              LvRepository.IssuCount := LvRegistry.ReadInteger('IssuCount');
+              LvRepository.CreatedDate := LvRegistry.ReadDateTime('CreatedDate');
+
+              FRepositoryList.Add(LvRepository);
+            end;
+            LvRegistry.CloseKey;
+          end;
+          UpdateUI;
+        end;
+      finally
+        LvRegistry.CloseKey;
+        LvTempList.Free;
+      end;
+    end;
+  finally
+    LvRegistry.Free;
+  end;
 end;
 
 { TStyleNotifier }

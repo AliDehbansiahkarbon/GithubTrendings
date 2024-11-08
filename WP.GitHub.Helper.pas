@@ -9,8 +9,8 @@ uses
   Vcl.Imaging.pngimage, System.Types, Vcl.Dialogs;
 
 const
-  FURL = 'https://api.github.com/search/repositories?q=language:%s+created:%s&sort=stars&order=desc&per_page=100&page=1';
-
+  cURL = 'https://api.github.com/search/repositories?q=language:%s+created:%s&sort=stars&order=desc&per_page=101&page=1';
+  cBaseKey = '\Software\GithubTrendingsPlugin';
 type
   TGitHubHelper = class
   private
@@ -86,7 +86,7 @@ begin
   if IndexStr(APeriod.ToLower, ['daily', 'weekly', 'monthly', 'yearly']) = -1 then
     raise Exception.Create('Invalid PeriodType. Must be "daily", "weekly", "monthly", or "yearly".');
 
-  URL := Format(FURL, [ALanguage, GetPeriodRange(APeriod.ToLower)]);
+  URL := Format(cURL, [ALanguage, GetPeriodRange(APeriod.ToLower)]);
   HTTPClient := TNetHTTPClient.Create(nil);
   try
     Response := HTTPClient.Get(URL);
