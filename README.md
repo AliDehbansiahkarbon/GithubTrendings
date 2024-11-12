@@ -15,7 +15,16 @@ This plugin keeps you updated on the community's latest achievements without the
 
 ![image](https://github.com/user-attachments/assets/9c4955e0-7e0d-428d-a6a0-c0aa7f40a3c7)
 ![image](https://github.com/user-attachments/assets/cb564d3e-45db-4e3b-81d9-592ead1a40e7)
+
+
+## Git Clone & try to open the downloaded project in the IDE
 ![image](https://github.com/user-attachments/assets/ed73f2b0-0c27-43d9-b172-96b3f93484c9)
+
+### Demo Video
+
+![GitHubTrending_CloneProject](https://github.com/user-attachments/assets/fd7b1501-c053-47e4-b0cc-b56f5d6491ac)
+
+
 
 
 
