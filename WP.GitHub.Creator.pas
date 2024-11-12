@@ -4,7 +4,7 @@ interface
 
 uses
   System.SysUtils, System.Classes, Vcl.Forms, Vcl.Controls, Vcl.Graphics, Vcl.Dialogs,
-  ToolsAPI.WelcomePage, WP.GitHub.Constants, ToolsAPI;
+  ToolsAPI.WelcomePage, ToolsAPI, WP.GitHub.Constants, WP.GitHub.Setting;
 
 type
   TWPDemoPlugInCreator = class(TInterfacedObject, INTAWelcomePagePlugin, INTAWelcomePageContentPluginCreator)
@@ -117,6 +117,7 @@ end;
 class procedure TWPDemoPlugInCreator.PlugInStartup;
 begin
   WelcomePagePluginService.RegisterPluginCreator(TWPDemoPlugInCreator.Create);
+  TSingletonSettings.Instance;
 end;
 
 class procedure TWPDemoPlugInCreator.PlugInFinish;

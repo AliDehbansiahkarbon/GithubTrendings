@@ -16,6 +16,7 @@ type
     FRegistryKeyName: string;
     FListIndex: Integer;
     FFavoriteImage: TImage;
+    FCloneURL: string;
     procedure SetLinkColor(const Value: TColor);
     procedure SetHoverColor(const Value: TColor);
     procedure SetVisitedColor(const Value: TColor);
@@ -35,6 +36,7 @@ type
     property RegistryKeyName: string read FRegistryKeyName write FRegistryKeyName;
     property ListIndex: Integer read FListIndex write FListIndex;
     property FavoriteImage: TImage read FFavoriteImage write FFavoriteImage;
+    property CloneURL: string read FCloneURL write FCloneURL;
   end;
 
 implementation

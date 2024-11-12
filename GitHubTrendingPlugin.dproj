@@ -126,6 +126,14 @@
         </DCCReference>
         <DCCReference Include="WP.GitHub.Helper.pas"/>
         <DCCReference Include="WP.GitHub.LinkLabelEx.pas"/>
+        <DCCReference Include="WP.GitHub.Setting.pas">
+            <Form>Frm_Settings</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
+        <DCCReference Include="WP.GitHub.CustomMessage.pas">
+            <Form>Frm_CustomMSG</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
         <RcItem Include="Resources\Star.bmp">
             <ResourceType>BITMAP</ResourceType>
             <ResourceId>STAR</ResourceId>

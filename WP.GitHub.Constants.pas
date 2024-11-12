@@ -24,10 +24,12 @@ const
   cIssueCountPrefix = 'lbl_IssueCount_';
   cLinkLablePrefix = 'LinkLabel_RepositoryLink_';
   cFavoritePrefix = 'Img_Favorite_';
+  cNoDescription = 'No description, website, or topics provided.';
 
   cGitHubURL = 'https://github.com';
-
-  cNoDescription = 'No description, website, or topics provided.';
+  cURL = 'https://api.github.com/search/repositories?q=language:%s+created:%s&sort=stars&order=desc&per_page=101&page=1';
+  cBaseKey = '\Software\GithubTrendingsPlugin';
+  cSettingsPath = '\GithubTrendingsSettings';
 
 resourcestring
   cPluginName = 'GitHub Trending Repositories';

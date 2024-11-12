@@ -5,20 +5,23 @@ interface
 uses
   System.SysUtils, System.Classes, System.JSON, System.Net.HttpClient,
   System.Net.URLClient, System.Net.HttpClientComponent, System.StrUtils,
-  System.DateUtils, System.TimeSpan, Vcl.ExtCtrls, Vcl.Graphics,
-  Vcl.Imaging.pngimage, System.Types, Vcl.Dialogs;
+  System.DateUtils, System.TimeSpan, Vcl.ExtCtrls, Vcl.Graphics, Winapi.ShellAPI,
+  Vcl.Imaging.pngimage, System.Types, Vcl.Dialogs, Winapi.Windows,
+  WP.GitHub.Constants, ToolsAPI, System.IOUtils, System.UITypes,
+  Vcl.Controls, WP.GitHub.Setting, WP.GitHub.CustomMessage;
 
-const
-  cURL = 'https://api.github.com/search/repositories?q=language:%s+created:%s&sort=stars&order=desc&per_page=101&page=1';
-  cBaseKey = '\Software\GithubTrendingsPlugin';
 type
   TGitHubHelper = class
   private
     class function DateTimeToISO8601(const ADateTime: TDateTime): string;
     class function GetPeriodRange(const APeriod: string): string;
+    class function FindFirstDelphiProject(const Directory: string): string; static;
   public
-    class function GetTrendingPascalRepositories(const APeriod: string; const ALanguage: string): string;
+    class procedure CloneGitHubRepo(const ARepoURL: string; const ARepoName: string); static;
+    class procedure CloneGitHubRepoAndOpen(const ARepoURL: string; const ARepoName: string); static;
+    class function GetTrendingPascalRepositories(const APeriod: string; const ALanguage: string): string; static;
     class function CheckInternetAvailabilityAsync(const URL: string; var AException: string): Boolean; static;
+    class procedure OpenProjectInIDE(const ProjectDirectoryPath: string); static;
   end;
 
   TImageHelper = class helper for TImage
@@ -35,23 +38,17 @@ var
   Offset: TTimeSpan;
   Hours, Mins: string;
 begin
-  // Convert TDateTime to UTC-based ISO 8601 format
   Result := FormatDateTime('yyyy-mm-dd"T"hh:nn:ss', ADateTime);
-
-  // Get local time zone information
   TZ := TTimeZone.Local;
   Offset := TZ.GetUtcOffset(ADateTime);
 
-  // Check if the time is in UTC
   if Offset = TTimeSpan.Zero then
     Result := Result + 'Z'  // UTC time
   else
   begin
-    // Extract hours and minutes from TTimeSpan
     Hours := Format('%.*d', [2, Abs(Offset.Hours)]);  // Hours
     Mins := Format('%.*d', [2, Abs(Offset.Minutes)]); // Minutes
 
-    // Add the time zone offset in ISO 8601 format
     if Offset.TotalHours >= 0 then
       Result := Result + '%2B' + Hours + ':' + Mins
     else
@@ -121,6 +118,141 @@ begin
   finally
     HttpClient.Free;
   end;
+end;
+
+class procedure TGitHubHelper.CloneGitHubRepo(const ARepoURL: string; const ARepoName: string);
+var
+  LvOpenDialog: TFileOpenDialog;
+  LvTargetPath: string;
+  LvCommand: string;
+begin
+  LvOpenDialog := TFileOpenDialog.Create(nil);
+  try
+    LvOpenDialog.Options := LvOpenDialog.Options + [fdoPickFolders]; // Enable folder selection
+    LvOpenDialog.Title := 'Select Target Folder for Cloning Repository';
+
+    if LvOpenDialog.Execute then
+    begin
+      LvTargetPath := LvOpenDialog.FileName;
+
+      if not DirectoryExists(LvTargetPath + '\' + ARepoName) then
+      begin
+        if ForceDirectories(LvTargetPath + '\' + ARepoName) then
+          LvTargetPath := LvTargetPath + '\' + ARepoName;
+      end;
+
+      LvCommand := Format('git clone %s "%s"', [ARepoURL, LvTargetPath]);
+      ShellExecute(0, 'open', 'cmd.exe', PChar('/C ' + LvCommand), nil, SW_SHOWNORMAL);
+    end;
+  finally
+    LvOpenDialog.Free;
+  end;
+end;
+
+class procedure TGitHubHelper.CloneGitHubRepoAndOpen(const ARepoURL: string; const ARepoName: string);
+var
+  LvOpenDialog: TFileOpenDialog;
+  LvTargetPath: string;
+  LvCommand: string;
+  StartupInfo: TStartupInfo;
+  ProcessInfo: TProcessInformation;
+  CmdLine: string;
+begin
+  LvOpenDialog := TFileOpenDialog.Create(nil);
+  try
+    LvOpenDialog.Options := LvOpenDialog.Options + [fdoPickFolders]; // Enable folder selection
+    LvOpenDialog.Title := 'Select Target Folder for Cloning Repository';
+
+    if LvOpenDialog.Execute then
+    begin
+      LvTargetPath := LvOpenDialog.FileName;
+
+      if not DirectoryExists(LvTargetPath + '\' + ARepoName) then
+      begin
+        if ForceDirectories(LvTargetPath + '\' + ARepoName) then
+          LvTargetPath := LvTargetPath + '\' + ARepoName;
+      end;
+
+      LvCommand := Format('git clone %s "%s"', [ARepoURL, LvTargetPath]);
+      CmdLine := Format('cmd.exe /C %s', [LvCommand]);
+
+      ZeroMemory(@StartupInfo, SizeOf(StartupInfo));
+      StartupInfo.cb := SizeOf(StartupInfo);
+      StartupInfo.dwFlags := STARTF_USESHOWWINDOW;
+      StartupInfo.wShowWindow := SW_SHOW;
+
+      if CreateProcess(nil, PChar(CmdLine), nil, nil, False, 0, nil, nil, StartupInfo, ProcessInfo) then
+      try
+        WaitForSingleObject(ProcessInfo.hProcess, INFINITE);
+      finally
+        CloseHandle(ProcessInfo.hProcess);
+        CloseHandle(ProcessInfo.hThread);
+      end;
+
+      OpenProjectInIDE(LvTargetPath);
+    end;
+  finally
+    LvOpenDialog.Free;
+  end;
+end;
+
+function ShowStyledMessage(const MsgText, MsgCaption: string): Integer;
+var
+  MsgForm: TFrm_CustomMSG;
+begin
+  MsgForm := TFrm_CustomMSG.CreateMessage(MsgText, MsgCaption);
+  try
+    TSingletonSettings.RegisterFormClassForTheming(TFrm_CustomMSG, MsgForm);
+    Result := MsgForm.ShowModal;
+  finally
+    MsgForm.Free;
+  end;
+end;
+
+class procedure TGitHubHelper.OpenProjectInIDE(const ProjectDirectoryPath: string);
+var
+  ModuleServices: IOTAModuleServices;
+begin
+  var LvFullPath := FindFirstDelphiProject(ProjectDirectoryPath);
+  if LvFullPath.Trim.IsEmpty then
+    Exit
+  else
+  begin
+    var LvMsg := 'A project file with the name "' + ExtractFileName(LvFullPath) + '" has been found,'
+               + sLineBreak + 'Would you like to open it in the IDE now?';
+
+    if ShowStyledMessage(LvMsg, 'Open Project') = mrYes then
+    begin
+      ModuleServices := BorlandIDEServices as IOTAModuleServices;
+      if Assigned(ModuleServices) then
+      begin
+        try
+          ModuleServices.OpenModule(LvFullPath);
+        except on E: Exception do
+          ShowMessage('Error opening project: ' + E.Message);
+        end;
+      end
+      else
+        ShowMessage('Module services are not available in the IDE.');
+    end;
+  end;
+end;
+
+class function TGitHubHelper.FindFirstDelphiProject(const Directory: string): string;
+var
+  Files: TArray<string>;
+begin
+  Result := '';
+  Files := TDirectory.GetFiles(Directory, '*.dproj', TSearchOption.soAllDirectories);
+
+  if Length(Files) = 0 then
+    Files := TDirectory.GetFiles(Directory, '*.dpr', TSearchOption.soAllDirectories);
+
+  if Length(Files) = 0 then
+    Files := TDirectory.GetFiles(Directory, '*.cppproj', TSearchOption.soAllDirectories);
+
+  if Length(Files) > 0 then
+    Result := Files[0];
 end;
 
 { TImaheHelper }

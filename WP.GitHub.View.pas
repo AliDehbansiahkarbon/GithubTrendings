@@ -9,7 +9,9 @@ uses
   System.Net.HttpClientComponent, WP.GitHub.Helper, System.Threading, Vcl.WinXCtrls, Winapi.ShellAPI,
   Vcl.Themes, ToolsAPI, Vcl.Imaging.jpeg, Vcl.GraphUtil, System.Generics.Defaults,
   System.Math, WP.GitHub.LinkLabelEx, Vcl.Imaging.pngimage, WP.GitHub.Constants,
-  Vcl.ControlList, System.Win.Registry;
+  Vcl.ControlList, System.Win.Registry, WP.GitHub.Setting, Vcl.Buttons,
+  System.ImageList, Vcl.ImgList, Vcl.VirtualImageList, System.StrUtils,
+  Vcl.BaseImageCollection, Vcl.ImageCollection;
 
 type
   TStyleNotifier = class(TNotifierObject, INTAIDEThemingServicesNotifier)
@@ -47,11 +49,18 @@ type
     mniPascal: TMenuItem;
     mniSQL: TMenuItem;
     mniC: TMenuItem;
-    chk_TopTen: TCheckBox;
     ControlList1: TControlList;
     PopupMenuRepoPanel: TPopupMenu;
     mniFavorites: TMenuItem;
-    chk_favorites: TCheckBox;
+    mniGitClone: TMenuItem;
+    pnlTop: TPanel;
+    SpeedButton1: TSpeedButton;
+    btnSetting: TSpeedButton;
+    btnFavorite: TSpeedButton;
+    chk_TopTen: TCheckBox;
+    mniGitCloneOpenProject: TMenuItem;
+    ilTitleFrame: TVirtualImageList;
+    ImageCollection1: TImageCollection;
     procedure mniDailyClick(Sender: TObject);
     procedure mniWeeklyClick(Sender: TObject);
     procedure mniMonthlyClick(Sender: TObject);
@@ -64,7 +73,11 @@ type
     procedure chk_TopTenClick(Sender: TObject);
     procedure PopupMenuRepoPanelPopup(Sender: TObject);
     procedure mniFavoritesClick(Sender: TObject);
-    procedure chk_favoritesClick(Sender: TObject);
+    procedure mniGitCloneClick(Sender: TObject);
+    procedure btnSettingClick(Sender: TObject);
+    procedure SpeedButton1Click(Sender: TObject);
+    procedure btnFavoriteClick(Sender: TObject);
+    procedure mniGitCloneOpenProjectClick(Sender: TObject);
   private
     FStylingNotifierIndex: Integer;
     FPeriod: string;
@@ -72,6 +85,7 @@ type
     FRepositoryList: TList<TRepository>;
     FStyleNotifier: TStyleNotifier;
     LastClickedLinkLabelEx: TLinkLabelEx;
+    FavoriteListLoaded: Boolean;
     procedure RefreshList;
     procedure AddRepository(const AIndex: Integer; const ARepository: TRepository; AThemingEnabled: Boolean; AColor: TColor);
     procedure LinkLabel_RepositoryLinkClick(Sender: TObject);
@@ -224,6 +238,7 @@ begin
   LvThemingEnabled := False;
   ActivityIndicator1.StopAnimation;
   ActivityIndicator1.Visible := False;
+  LvNewColor := clWindow;
 
   if AIsEmpty then
   begin
@@ -284,6 +299,37 @@ begin
   end;
 end;
 
+procedure TMainFrame.btnFavoriteClick(Sender: TObject);
+begin
+  if not FavoriteListLoaded then
+  begin
+    try
+      LoadFavorites;
+      btnFavorite.ImageIndex := 3;
+      FavoriteListLoaded := True;
+    except on E: Exception do
+      begin
+        btnFavorite.ImageIndex := 2;
+        UpdateUI(True, E.Message);
+      end;
+    end;
+  end
+  else
+  begin
+    FavoriteListLoaded := False;
+    btnFavorite.ImageIndex := 2;
+    RefreshList;
+  end;
+end;
+
+procedure TMainFrame.btnSettingClick(Sender: TObject);
+begin
+  Frm_Settings := TFrm_Settings.Create(nil);
+  TSingletonSettings.RegisterFormClassForTheming(TFrm_Settings, Frm_Settings);
+  Frm_Settings.Position := poMainFormCenter;
+  Frm_Settings.ShowModal;
+end;
+
 procedure TMainFrame.mniCClick(Sender: TObject);
 begin
   ChangeLanguage(cC);
@@ -303,23 +349,6 @@ begin
   RefreshList;
 end;
 
-procedure TMainFrame.chk_favoritesClick(Sender: TObject);
-begin
-  if chk_favorites.Checked then
-  begin
-    try
-      LoadFavorites;
-    except on E: Exception do
-      begin
-        chk_favorites.Checked := False;
-        UpdateUI(True, E.Message);
-      end;
-    end;
-  end
-  else
-    PullRepoList;
-end;
-
 procedure TMainFrame.chk_TopTenClick(Sender: TObject);
 begin
   RefreshList;
@@ -331,7 +360,7 @@ var
 begin
   for I := Pred(Self.ComponentCount) downto 0 do
   begin
-    if (Self.Components[I] is TPanel) and (TPanel(Self.Components[I]).Name <> 'pnlBottom') then
+    if (Self.Components[I] is TPanel) and (TPanel(Self.Components[I]).Name <> 'pnlBottom') and (TPanel(Self.Components[I]).Name <> 'pnlTop') then
       Self.Components[I].Free;
   end;
 
@@ -364,11 +393,16 @@ begin
   FPeriod := cDaily;
   FLanguage := cPascal;
   FRepositoryList := TList<TRepository>.Create;
-  RefreshList;
+
+  if TSingletonSettings.Instance.StartupLoad then
+    RefreshList
+  else
+    LoadFavorites;
 end;
 
 destructor TMainFrame.Destroy;
 begin
+  TSingletonSettings.Instance.Free;
   FRepositoryList.Free;
   if FStylingNotifierIndex <> -1 then
     (BorlandIDEServices as IOTAIDEThemingServices).RemoveNotifier(FStylingNotifierIndex);
@@ -432,7 +466,7 @@ begin
   if FRepositoryList.Count > 0 then
   begin
     var Url: string;
-    Url := cGitHubURL +'/' + FRepositoryList.Items[TLinkLabel(Sender).Tag].Author + '/' +  FRepositoryList.Items[TLinkLabel(Sender).Tag].RepoName;
+    Url := TLinkLabelEx(Sender).CloneURL;
     ShellExecute(0, 'open', PChar(Url), nil, nil, SW_SHOWNORMAL);
 
     TLinkLabelEx(Sender).Visited := True;
@@ -473,6 +507,16 @@ begin
     SaveToFavorites(LastClickedLinkLabelEx.ListIndex);
 end;
 
+procedure TMainFrame.mniGitCloneClick(Sender: TObject);
+begin
+  TGitHubHelper.CloneGitHubRepo(LastClickedLinkLabelEx.CloneURL, LastClickedLinkLabelEx.RegistryKeyName);
+end;
+
+procedure TMainFrame.mniGitCloneOpenProjectClick(Sender: TObject);
+begin
+  TGitHubHelper.CloneGitHubRepoAndOpen(LastClickedLinkLabelEx.CloneURL, LastClickedLinkLabelEx.RegistryKeyName);
+end;
+
 procedure TMainFrame.RefreshList;
 begin
   TTask.Run(procedure begin PullRepoList; end);
@@ -489,7 +533,13 @@ begin
     begin
       LvRegistry.DeleteKey(cBaseKey + '\' + FRepositoryList.Items[AIndex].RepoName);
       LvRegistry.CloseKey;
+
       LastClickedLinkLabelEx.FavoriteImage.Visible := False;
+      if FavoriteListLoaded then
+      begin
+        FRepositoryList.Delete(AIndex);
+        UpdateUI;
+      end;
     end;
   finally
     LvRegistry.Free;
@@ -523,6 +573,11 @@ begin
   finally
     LvRegistry.Free;
   end;
+end;
+
+procedure TMainFrame.SpeedButton1Click(Sender: TObject);
+begin
+  RefreshList;
 end;
 
 function TMainFrame.TruncateTextToFit(ACanvas: TCanvas; const AText: string; AMaxWidth: Integer): string;
@@ -750,9 +805,7 @@ begin
     Top := 5;
     Width := 150;
     Height := 19;
-    RegistryKeyName := ARepository.RepoName;
     ListIndex := AIndex;
-    CaptionEx := ARepository.Author + '/' + ARepository.RepoName;
     TabOrder := 0;
     ParentColor := False;
     ParentFont := False;
@@ -765,6 +818,11 @@ begin
     LinkColor := clMenuHighlight;
     HoverColor := clHighlight;
     VisitedColor := clGray;
+
+    RegistryKeyName := ARepository.RepoName;
+    CloneURL := ARepository.RepoURL + '.git';
+    CaptionEx := ARepository.Author + '/' + ARepository.RepoName;
+
     OnClick := LinkLabel_RepositoryLinkClick;
     PopupMenu := PopupMenuRepoPanel;
   end;
@@ -776,16 +834,19 @@ begin
     Parent := LvPanel;
     Transparent := True;
     Name := cFavoritePrefix + AIndex.ToString;
-    Left := lbl_IssuCount.Left + lbl_IssuCount.Width + 10;
+    //Left := lbl_IssuCount.Left + lbl_IssuCount.Width + 10;
+    Left :=  LvPanel.Width - 15;
     if LvIsSmallTextWith then
       Top := 60
     else
       Top := 70;
 
-    Width := 17;
-    Height := 16;
+    Width := 12;
+    Height := 12;
     LoadImageFromResource(Img_Faveorite, 'FAV');
     Visible := IsAlreadyFavorite(LinkLabel_RepositoryLink);
+    ShowHint := True;
+    Hint := 'Stored in favorite list.';
   end;
 
   var Img_Avatar := TImage.Create(Self);
@@ -819,7 +880,6 @@ var
   LvRegistry: TRegistry;
   LvRepository: TRepository;
   LvTempList: TStringList;
-  I: Integer;
 begin
   Result := False;
   LvRegistry := TRegistry.Create;
@@ -839,6 +899,9 @@ begin
 
           for var LvRepoName in LvTempList do
           begin
+            if LvRepoName.ToLower.Equals(RightStr(cSettingsPath, Length(cSettingsPath) - 1).ToLower) then
+              Continue;
+
             if LvRegistry.OpenKeyReadOnly(cBaseKey + '\' + LvRepoName.Trim) then
             begin
               LvRepository := Default(TRepository);

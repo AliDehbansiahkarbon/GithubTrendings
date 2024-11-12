@@ -41,7 +41,9 @@ contains
   WP.GitHub.Creator in 'WP.GitHub.Creator.pas',
   WP.GitHub.View in 'WP.GitHub.View.pas' {MainFrame: TFrame},
   WP.GitHub.Helper in 'WP.GitHub.Helper.pas',
-  WP.GitHub.LinkLabelEx in 'WP.GitHub.LinkLabelEx.pas';
+  WP.GitHub.LinkLabelEx in 'WP.GitHub.LinkLabelEx.pas',
+  WP.GitHub.Setting in 'WP.GitHub.Setting.pas' {Frm_Settings},
+  WP.GitHub.CustomMessage in 'WP.GitHub.CustomMessage.pas' {Frm_CustomMSG};
 
 end.
 
