@@ -20,10 +20,9 @@ This plugin keeps you updated on the community's latest achievements without the
 ## Git Clone & try to open the downloaded project in the IDE
 ![image](https://github.com/user-attachments/assets/ed73f2b0-0c27-43d9-b172-96b3f93484c9)
 
-### Demo Video
+### ![Demo Video](https://github.com/AliDehbansiahkarbon/GithubTrendings/blob/master/Resources/CloneDemo.gif)
 
-![GitHubTrending_CloneProject](https://github.com/user-attachments/assets/fd7b1501-c053-47e4-b0cc-b56f5d6491ac)
-
+![](https://github.com/AliDehbansiahkarbon/GithubTrendings/blob/master/Resources/CloneDemo.gif)
 
 
 
