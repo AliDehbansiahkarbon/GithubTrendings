@@ -25,6 +25,7 @@ const
   cLinkLablePrefix = 'LinkLabel_RepositoryLink_';
   cFavoritePrefix = 'Img_Favorite_';
   cNoDescription = 'No description, website, or topics provided.';
+  cFavoriteIsEmpty = 'Favorite list is empty.';
 
   cGitHubURL = 'https://github.com';
   cURL = 'https://api.github.com/search/repositories?q=language:%s+created:%s&sort=stars&order=desc&per_page=101&page=1';

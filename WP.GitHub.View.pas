@@ -243,7 +243,7 @@ begin
   if AIsEmpty then
   begin
     ClearScrollBox;
-    var LvEmptyLabel := TLabel.Create(Self);
+    var LvEmptyLabel := TLabel.Create(ScrollBox);
     LvEmptyLabel.Name := 'emptylabel';
     LvEmptyLabel.Parent := ScrollBox;
     LvEmptyLabel.Caption := AMsg;
@@ -328,6 +328,7 @@ begin
   TSingletonSettings.RegisterFormClassForTheming(TFrm_Settings, Frm_Settings);
   Frm_Settings.Position := poMainFormCenter;
   Frm_Settings.ShowModal;
+  Frm_Settings.Free;
 end;
 
 procedure TMainFrame.mniCClick(Sender: TObject);
@@ -366,10 +367,7 @@ begin
 
   for I := Pred(ScrollBox.ComponentCount) downto 0 do
   begin
-    if (Self.Components[I] is TLabel) and (TLabel(Self.Components[I]).Name = 'emptylabel') then
-      Self.Components[I].Free;
-
-    if ScrollBox.Components[I] is TPanel then
+    if (ScrollBox.Components[I] is TLabel) and (TLabel(ScrollBox.Components[I]).Name = 'emptylabel') then
       ScrollBox.Components[I].Free;
   end;
 
@@ -393,6 +391,25 @@ begin
   FPeriod := cDaily;
   FLanguage := cPascal;
   FRepositoryList := TList<TRepository>.Create;
+
+  var LvPeriod, LvLang: string;
+  case TSingletonSettings.Instance.DefaultPeriodIndex of
+    0: LvPeriod := cDaily;
+    1: LvPeriod := cWeekly;
+    2: LvPeriod := cMonthly;
+    3: LvPeriod := cYearly;
+  end;
+  case TSingletonSettings.Instance.DefaultLanguageIndex of
+    0: LvLang := cPascal;
+    1: LvLang := cC;
+    2: LvLang := cSQL;
+  end;
+
+  Btn_LoadRepositories.Caption := LvPeriod;
+  FPeriod := LvPeriod.ToLower;
+
+  Btn_ChangeLanguage.Caption := LvLang;
+  FLanguage := LvLang.ToLower;
 
   if TSingletonSettings.Instance.StartupLoad then
     RefreshList
@@ -538,7 +555,10 @@ begin
       if FavoriteListLoaded then
       begin
         FRepositoryList.Delete(AIndex);
-        UpdateUI;
+        if FRepositoryList.Count = 0 then
+          UpdateUI(True, cFavoriteIsEmpty)
+        else
+          UpdateUI;
       end;
     end;
   finally
@@ -890,9 +910,10 @@ begin
       LvTempList:= TStringList.Create;
       try
         LvRegistry.GetKeyNames(LvTempList);
+        LvTempList.Delete(LvTempList.IndexOf('GithubTrendingsSettings'));
 
         if LvTempList.IsEmpty then
-          UpdateUI(True, 'Favorite list is empty.')
+          UpdateUI(True, cFavoriteIsEmpty)
         else
         begin
           FRepositoryList.Clear;
