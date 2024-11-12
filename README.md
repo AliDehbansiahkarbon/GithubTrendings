@@ -9,18 +9,18 @@ This plugin keeps you updated on the community's latest achievements without the
 - Add or remove favorite repositories (right-click on the repo link).
 - Options for different periods: Daily, Weekly, Monthly, and Yearly.
 - Top 10 list for all periods.
-- Git Clone(& try to open the project) - Git.exe must be installed and made available in environment variables.
+- Git Clone(& try to open the project) - **Git.exe must be installed** and made available in environment variables.
  
 ## Screenshots
 
-![image](https://github.com/user-attachments/assets/9c4955e0-7e0d-428d-a6a0-c0aa7f40a3c7)
-![image](https://github.com/user-attachments/assets/cb564d3e-45db-4e3b-81d9-592ead1a40e7)
+<img src="https://github.com/user-attachments/assets/9c4955e0-7e0d-428d-a6a0-c0aa7f40a3c7" alt="image" height="600" width="400">
+<img src="https://github.com/user-attachments/assets/cb564d3e-45db-4e3b-81d9-592ead1a40e7" alt="image" height="600" width="400">
 
 
-## Git Clone & try to open the downloaded project in the IDE
+## Favorites, Git Clone(**Git.exe must be installed**) and try to open the downloaded project in the IDE.
 ![image](https://github.com/user-attachments/assets/ed73f2b0-0c27-43d9-b172-96b3f93484c9)
 
-### ![Demo Video](https://github.com/AliDehbansiahkarbon/GithubTrendings/blob/master/Resources/CloneDemo.gif)
+### Demo Video(**Git.exe must be installed**)
 
 ![](https://github.com/AliDehbansiahkarbon/GithubTrendings/blob/master/Resources/CloneDemo.gif)
 
