@@ -43,7 +43,8 @@ contains
   WP.GitHub.Helper in 'WP.GitHub.Helper.pas',
   WP.GitHub.LinkLabelEx in 'WP.GitHub.LinkLabelEx.pas',
   WP.GitHub.Setting in 'WP.GitHub.Setting.pas' {Frm_Settings},
-  WP.GitHub.CustomMessage in 'WP.GitHub.CustomMessage.pas' {Frm_CustomMSG};
+  WP.GitHub.CustomMessage in 'WP.GitHub.CustomMessage.pas' {Frm_CustomMSG},
+  WP.SplashIcon.Registration in 'WP.SplashIcon.Registration.pas';
 
 end.
 

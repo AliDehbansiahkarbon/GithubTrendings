@@ -134,6 +134,7 @@
             <Form>Frm_CustomMSG</Form>
             <FormType>dfm</FormType>
         </DCCReference>
+        <DCCReference Include="WP.SplashIcon.Registration.pas"/>
         <RcItem Include="Resources\Star.bmp">
             <ResourceType>BITMAP</ResourceType>
             <ResourceId>STAR</ResourceId>
@@ -149,6 +150,10 @@
         <RcItem Include="Resources\Fav.bmp">
             <ResourceType>BITMAP</ResourceType>
             <ResourceId>FAV</ResourceId>
+        </RcItem>
+        <RcItem Include="Resources\Splash.bmp">
+            <ResourceType>BITMAP</ResourceType>
+            <ResourceId>SPLASH</ResourceId>
         </RcItem>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
