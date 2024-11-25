@@ -1,0 +1,16 @@
+* text=auto
+
+*.pas eol=crlf
+*.dpr eol=crlf
+*.dpk eol=crlf
+
+*.pas text
+*.dfm text
+*.md text
+*.txt text
+*.dpk -text
+*.dproj -text
+*.groupproj -text
+
+*.exe binary
+*.res binary
