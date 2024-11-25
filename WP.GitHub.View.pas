@@ -644,6 +644,7 @@ begin
   LvPanel.BevelEdges := [];
   LvPanel.BevelKind := TBevelKind.bkNone;
   LvPanel.BevelOuter := TBevelCut.bvNone;
+  LvPanel.BevelInner := TBevelCut.bvNone;
 
   if AThemingEnabled then
   begin
@@ -692,6 +693,8 @@ begin
     else
     begin
       LvIsSmallTextWith := False;
+      LvPanel.Height := LvPanel.Height + 10;
+      ControlList1.Height := ControlList1.Height + 10;
       Height := 40;
     end;
     WordWrap := True;
@@ -710,7 +713,7 @@ begin
     if LvIsSmallTextWith then
       Top := 60
     else
-      Top := 70;
+      Top := 80;
 
     Width := 16;
     Height := 16;
@@ -727,7 +730,7 @@ begin
     if LvIsSmallTextWith then
       Top := 62
     else
-      Top := 72;
+      Top := 82;
 
     Width := 5;
     Height := 12;
@@ -750,7 +753,7 @@ begin
     if LvIsSmallTextWith then
       Top := 60
     else
-      Top := 70;
+      Top := 80;
 
     Width := 17;
     Height := 16;
@@ -767,7 +770,7 @@ begin
     if LvIsSmallTextWith then
       Top := 62
     else
-      Top := 72;
+      Top := 82;
 
     Width := 5;
     Height := 12;
@@ -790,7 +793,7 @@ begin
     if LvIsSmallTextWith then
       Top := 60
     else
-      Top := 70;
+      Top := 80;
 
     Width := 17;
     Height := 16;
@@ -807,7 +810,7 @@ begin
     if LvIsSmallTextWith then
       Top := 62
     else
-      Top := 72;
+      Top := 82;
 
     Width := 5;
     Height := 12;
@@ -864,7 +867,7 @@ begin
     if LvIsSmallTextWith then
       Top := 60
     else
-      Top := 70;
+      Top := 80;
 
     Width := 12;
     Height := 12;
