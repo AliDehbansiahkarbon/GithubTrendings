@@ -203,6 +203,8 @@ object MainFrame: TMainFrame
       Height = 27
       Align = alRight
       Caption = 'Top10'
+      Checked = True
+      State = cbChecked
       TabOrder = 0
       OnClick = chk_TopTenClick
     end

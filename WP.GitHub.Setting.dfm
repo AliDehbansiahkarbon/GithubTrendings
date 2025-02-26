@@ -78,7 +78,7 @@ object Frm_Settings: TFrm_Settings
       Height = 23
       Anchors = [akRight, akBottom]
       Caption = 'Close'
-      TabOrder = 0
+      TabOrder = 4
       OnClick = Btn_CloseClick
     end
     object Btn_Save: TButton
@@ -88,7 +88,7 @@ object Frm_Settings: TFrm_Settings
       Height = 23
       Anchors = [akRight, akBottom]
       Caption = 'Save'
-      TabOrder = 1
+      TabOrder = 3
       OnClick = Btn_SaveClick
     end
     object cbb_Period: TComboBox
@@ -98,7 +98,7 @@ object Frm_Settings: TFrm_Settings
       Height = 23
       Style = csDropDownList
       ItemIndex = 0
-      TabOrder = 2
+      TabOrder = 1
       Text = 'Daily'
       Items.Strings = (
         'Daily'
@@ -113,7 +113,7 @@ object Frm_Settings: TFrm_Settings
       Height = 23
       Style = csDropDownList
       ItemIndex = 0
-      TabOrder = 3
+      TabOrder = 2
       Text = 'Pascal'
       Items.Strings = (
         'Pascal'
@@ -126,7 +126,7 @@ object Frm_Settings: TFrm_Settings
       Width = 119
       Height = 17
       Caption = 'Load at IDE startup'
-      TabOrder = 4
+      TabOrder = 0
     end
   end
 end
