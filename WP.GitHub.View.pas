@@ -93,6 +93,7 @@ type
     FavoriteListLoaded: Boolean;
     FDesignPPI: Integer;
     FLastPPI: Integer;
+    FCreationTime: Boolean;
     procedure RefreshList;
     procedure AddRepository(const AIndex: Integer; const ARepository: TRepository; AThemingEnabled: Boolean; AColor: TColor);
     procedure LinkLabel_RepositoryLinkClick(Sender: TObject);
@@ -130,7 +131,7 @@ uses
 
 procedure TMainFrame.PanelResize(Sender: TObject);
 begin
-  if Sender is TPanel then
+  if not FCreationTime then
     LayoutRepositoryPanel(TPanel(Sender)); // keep the item coherent
 end;
 
@@ -340,8 +341,10 @@ begin
     ClearScrollBox;
     InitListChrome;
 
+    FCreationTime := True;
     for I := 0 to Pred(FRepositoryList.Count) do
       AddRepository(I, FRepositoryList.Items[I], LvThemingEnabled, LvNewColor);
+    FCreationTime := False;
   end;
 end;
 
@@ -721,7 +724,7 @@ begin
   if BottomY <> APanel.Height then
     APanel.Height := BottomY;
 
-  ControlList1.Width := ControlList1.Width - 1;
+  //ControlList1.Width := ControlList1.Width - 1;
 end;
 
 procedure TMainFrame.LinkLabel_RepositoryLinkClick(Sender: TObject);
@@ -867,7 +870,7 @@ var
   ImgStars, ImgFork, ImgIssue, ImgFavorite, ImgAvatar: TImage;
   LinkRepository: TLinkLabelEx;
 begin
-  ControlList1.DisableAlign;
+  //ControlList1.DisableAlign;
   try
     // --- Panel (row container) ---
     LvPanel := TPanel.Create(Self);
@@ -882,14 +885,13 @@ begin
     LvPanel.Height := Dpi(88);
     LvPanel.Tag := AIndex;      // used by LayoutRepositoryPanel
     LvPanel.OnResize := PanelResize;
-
     LvPanel.AutoSize := False;
     LvPanel.Align := alTop;
-    LvPanel.AlignWithMargins := True;           // opt-in to margins for precise spacing
-    LvPanel.Margins.Left   := 0;
-    LvPanel.Margins.Right  := 0;
-    LvPanel.Margins.Top    := 0;
-    LvPanel.Margins.Bottom := Px(LvPanel, 2);   // shrink or set to 0 as you like
+//    LvPanel.AlignWithMargins := True;           // opt-in to margins for precise spacing
+//    LvPanel.Margins.Left   := 0;
+//    LvPanel.Margins.Right  := 0;
+//    LvPanel.Margins.Top    := 0;
+//    LvPanel.Margins.Bottom := Px(LvPanel, 2);   // shrink or set to 0 as you like
 
     if AThemingEnabled then
     begin
@@ -1097,9 +1099,10 @@ begin
     end;
 
     LayoutRepositoryPanel(LvPanel);
-    ControlList1.Height := ControlList1.Height + LvPanel.Height;
+
   finally
-    ControlList1.EnableAlign;
+//    ControlList1.EnableAlign;
+    ControlList1.Height := ControlList1.Height + LvPanel.Height;
   end;
 end;
 
