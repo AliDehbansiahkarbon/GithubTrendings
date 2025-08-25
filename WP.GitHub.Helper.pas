@@ -105,12 +105,11 @@ class function TGitHubHelper.CheckInternetAvailabilityAsync(const URL: string; v
 var
   HttpClient: THttpClient;
 begin
-  Result := False;
   HttpClient := THttpClient.Create;
-  HttpClient.ConnectionTimeout := 2000;
-  HttpClient.SendTimeout := 2000;
-  HttpClient.ResponseTimeout := 2000;
   try
+    HttpClient.ConnectionTimeout := 2000;
+    HttpClient.SendTimeout := 2000;
+    HttpClient.ResponseTimeout := 2000;
     try
       HttpClient.Head(URL);
       Result := True;

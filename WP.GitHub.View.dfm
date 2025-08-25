@@ -92,6 +92,7 @@ object MainFrame: TMainFrame
       ItemMargins.Bottom = 0
       ColumnLayout = cltMultiTopToBottom
       ParentColor = False
+      MarkDisabledItem = False
       TabOrder = 0
       SmoothMouseWheelScrolling = True
     end
