@@ -59,13 +59,14 @@ type
     mniFavorites: TMenuItem;
     mniGitClone: TMenuItem;
     pnlTop: TPanel;
-    SpeedButton1: TSpeedButton;
+    btnReload: TSpeedButton;
     btnSetting: TSpeedButton;
     btnFavorite: TSpeedButton;
     chk_TopTen: TCheckBox;
     mniGitCloneOpenProject: TMenuItem;
     ilTitleFrame: TVirtualImageList;
     ImageCollection1: TImageCollection;
+    btnStop: TSpeedButton;
     procedure mniDailyClick(Sender: TObject);
     procedure mniWeeklyClick(Sender: TObject);
     procedure mniMonthlyClick(Sender: TObject);
@@ -80,9 +81,10 @@ type
     procedure mniFavoritesClick(Sender: TObject);
     procedure mniGitCloneClick(Sender: TObject);
     procedure btnSettingClick(Sender: TObject);
-    procedure SpeedButton1Click(Sender: TObject);
+    procedure btnReloadClick(Sender: TObject);
     procedure btnFavoriteClick(Sender: TObject);
     procedure mniGitCloneOpenProjectClick(Sender: TObject);
+    procedure btnStopClick(Sender: TObject);
   private
     FStylingNotifierIndex: Integer;
     FPeriod: string;
@@ -94,6 +96,7 @@ type
     FDesignPPI: Integer;
     FLastPPI: Integer;
     FCreationTime: Boolean;
+    FStop: Boolean;
     procedure RefreshList;
     procedure AddRepository(const AIndex: Integer; const ARepository: TRepository; AThemingEnabled: Boolean; AColor: TColor);
     procedure LinkLabel_RepositoryLinkClick(Sender: TObject);
@@ -157,6 +160,8 @@ var
   LvRepo: TJSONObject;
   LvOwner: TJSONObject;
 begin
+  FStop := False;
+
   TThread.Synchronize(TThread.Current,
   procedure
   begin
@@ -339,7 +344,14 @@ begin
     FCreationTime := True;
     for I := 0 to Pred(FRepositoryList.Count) do
     begin
+      if FStop then
+      begin
+        FStop := False;
+        Break;
+      end;
+
       AddRepository(I, FRepositoryList.Items[I], LvThemingEnabled, LvNewColor);
+
       if (I > 0) and (I mod 2 = 0) then
       begin
         ControlList1.Invalidate;
@@ -380,6 +392,11 @@ begin
   Frm_Settings.Position := poMainFormCenter;
   Frm_Settings.ShowModal;
   Frm_Settings.Free;
+end;
+
+procedure TMainFrame.btnStopClick(Sender: TObject);
+begin
+  FStop := True;
 end;
 
 procedure TMainFrame.mniCClick(Sender: TObject);
@@ -846,7 +863,7 @@ begin
   end;
 end;
 
-procedure TMainFrame.SpeedButton1Click(Sender: TObject);
+procedure TMainFrame.btnReloadClick(Sender: TObject);
 begin
   RefreshList;
 end;
