@@ -195,9 +195,9 @@ begin
 
             var LvRepoCount: Integer;
             if chk_TopTen.Checked then
-              LvRepoCount := Min(9 , LvRepositories.Count - 1)
+              LvRepoCount := Min(10 , LvRepositories.Count - 1)
             else
-              LvRepoCount := Min(99, LvRepositories.Count - 1);
+              LvRepoCount := Min(100, LvRepositories.Count - 1);
 
             lbl_RepoCount.Caption := '(' + LvRepoCount.ToString + ')';
             lbl_RepoCount.Align := alRight;
@@ -237,7 +237,7 @@ begin
         ShowMessage('Error: ' + E.Message);
       end;
     finally
-      TThread.Synchronize(TThread.Current, procedure begin UpdateUI; end);
+      TThread.Queue(TThread.CurrentThread, procedure begin UpdateUI; end);
     end;
   end);
 end;
@@ -247,7 +247,6 @@ var
   DC: HDC;
   PPI: Integer;
 begin
-  // 1) Prefer the reference control's current PPI (Per-Monitor V2 aware)
   {$IF CompilerVersion >= 34.0} // 10.4+
   if Assigned(Ref) then
     PPI := Ref.CurrentPPI
@@ -257,7 +256,6 @@ begin
   PPI := Screen.PixelsPerInch;
   {$IFEND}
 
-  // 2) If still unknown/zero (can happen early), ask GDI
   if PPI <= 0 then
   begin
     DC := GetDC(0);
@@ -268,11 +266,9 @@ begin
     end;
   end;
 
-  // 3) Final fallback
   if PPI <= 0 then
     PPI := 96;
 
-  // Cache the last non-zero PPI to guard against transient zeros
   FLastPPI := PPI;
   Result := PPI;
 end;
@@ -282,9 +278,8 @@ var
   PPI, DesignPPI: Integer;
 begin
   if FDesignPPI = 0 then
-    FDesignPPI := 96; // your design-time baseline
+    FDesignPPI := 96;
 
-  // Use last known PPI if present; otherwise compute safely
   if FLastPPI > 0 then
     PPI := FLastPPI
   else
@@ -343,7 +338,14 @@ begin
 
     FCreationTime := True;
     for I := 0 to Pred(FRepositoryList.Count) do
+    begin
       AddRepository(I, FRepositoryList.Items[I], LvThemingEnabled, LvNewColor);
+      if (I > 0) and (I mod 2 = 0) then
+      begin
+        ControlList1.Invalidate;
+        Application.ProcessMessages;
+      end;
+    end;
     FCreationTime := False;
   end;
 end;
@@ -851,12 +853,10 @@ end;
 
 procedure TMainFrame.InitListChrome;
 begin
-  // ControlList1 is the inner host panel inside the ScrollBox
   ControlList1.AlignWithMargins := False;
   ControlList1.BorderStyle := bsNone;
   ControlList1.Padding.SetBounds(0,0,0,0);
 
-  // ScrollBox too (just in case)
   ScrollBox.BevelEdges := [];
   ScrollBox.BevelKind  := bkNone;
   ScrollBox.BorderStyle := bsNone;
@@ -870,10 +870,9 @@ var
   ImgStars, ImgFork, ImgIssue, ImgFavorite, ImgAvatar: TImage;
   LinkRepository: TLinkLabelEx;
 begin
-  //ControlList1.DisableAlign;
+  LvPanel := TPanel.Create(Self);
   try
     // --- Panel (row container) ---
-    LvPanel := TPanel.Create(Self);
     LvPanel.Name  := cPanelPrefix + AIndex.ToString;
     LvPanel.Caption := EmptyStr;
     LvPanel.Parent := ControlList1;
@@ -887,11 +886,6 @@ begin
     LvPanel.OnResize := PanelResize;
     LvPanel.AutoSize := False;
     LvPanel.Align := alTop;
-//    LvPanel.AlignWithMargins := True;           // opt-in to margins for precise spacing
-//    LvPanel.Margins.Left   := 0;
-//    LvPanel.Margins.Right  := 0;
-//    LvPanel.Margins.Top    := 0;
-//    LvPanel.Margins.Bottom := Px(LvPanel, 2);   // shrink or set to 0 as you like
 
     if AThemingEnabled then
     begin
@@ -1099,9 +1093,7 @@ begin
     end;
 
     LayoutRepositoryPanel(LvPanel);
-
   finally
-//    ControlList1.EnableAlign;
     ControlList1.Height := ControlList1.Height + LvPanel.Height;
   end;
 end;
