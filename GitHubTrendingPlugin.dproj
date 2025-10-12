@@ -66,7 +66,7 @@
         <SanitizedProjectName>GitHubTrendingPlugin</SanitizedProjectName>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <VerInfo_Keys>CompanyName=;FileDescription=$(MSBuildProjectName);FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
-        <DCC_Description>Embarcadero Welcome Page Basic Demo Plugin</DCC_Description>
+        <DCC_Description>Github Trending Plugin(Ali Dehbansiahkarbon)</DCC_Description>
         <DesignOnlyPackage>true</DesignOnlyPackage>
         <DllSuffix>$(Auto)</DllSuffix>
     </PropertyGroup>
@@ -97,9 +97,7 @@
         <DCC_RemoteDebug>false</DCC_RemoteDebug>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <Debugger_HostApplication>C:\Program Files (x86)\Embarcadero\Studio\23.0\bin\bds.exe</Debugger_HostApplication>
-        <DCC_Description>Ali Dehbansiahkarbon.(adehban@gmail.com)</DCC_Description>
         <Debugger_DebugSourcePath>D:\Projects\WelcomePage GitHub Trending PlugIn;$(Debugger_DebugSourcePath)</Debugger_DebugSourcePath>
-        <DllSuffix>$(Auto)</DllSuffix>
         <DCC_OutputDependencies>true</DCC_OutputDependencies>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2)'!=''">
@@ -110,32 +108,12 @@
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
+        <DCC_Description>Github Trending Plugin(Ali Dehbansiahkarbon)</DCC_Description>
     </PropertyGroup>
     <ItemGroup>
         <DelphiCompile Include="$(MainSource)">
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
-        <DCCReference Include="rtl.dcp"/>
-        <DCCReference Include="vcl.dcp"/>
-        <DCCReference Include="designide.dcp"/>
-        <DCCReference Include="WP.GitHub.Constants.pas"/>
-        <DCCReference Include="WP.GitHub.Creator.pas"/>
-        <DCCReference Include="WP.GitHub.View.pas">
-            <Form>MainFrame</Form>
-            <FormType>dfm</FormType>
-            <DesignClass>TFrame</DesignClass>
-        </DCCReference>
-        <DCCReference Include="WP.GitHub.Helper.pas"/>
-        <DCCReference Include="WP.GitHub.LinkLabelEx.pas"/>
-        <DCCReference Include="WP.GitHub.Setting.pas">
-            <Form>Frm_Settings</Form>
-            <FormType>dfm</FormType>
-        </DCCReference>
-        <DCCReference Include="WP.GitHub.CustomMessage.pas">
-            <Form>Frm_CustomMSG</Form>
-            <FormType>dfm</FormType>
-        </DCCReference>
-        <DCCReference Include="WP.SplashIcon.Registration.pas"/>
         <RcItem Include="Resources\Star.bmp">
             <ResourceType>BITMAP</ResourceType>
             <ResourceId>STAR</ResourceId>
@@ -177,9 +155,12 @@
                     <Source Name="MainSource">GitHubTrendingPlugin.dpk</Source>
                 </Source>
                 <Excluded_Packages>
-                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\GitHubTrendingPlugin290.bpl">Ali Dehbansiahkarbon.(adehban@gmail.com)</Excluded_Packages>
-                    <Excluded_Packages Name="C:\Program Files (x86)\Raize\CS5\Bin\CodeSiteLoggingPkg_Design290.bpl">CodeSite Studio 5.4.2 - Logging Components</Excluded_Packages>
-                    <Excluded_Packages Name="C:\Program Files (x86)\Raize\CS5\Bin\CodeSiteDBToolsPkg_Design290.bpl">CodeSite Studio 5.4.2 - DB Tools</Excluded_Packages>
+                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\dclFMXfrCoreLibrary29.bpl">File C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\dclFMXfrCoreLibrary29.bpl not found</Excluded_Packages>
+                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\dclFMXfrLocalizationLibrary29.bpl">File C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\dclFMXfrLocalizationLibrary29.bpl not found</Excluded_Packages>
+                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\dclFMXfrx29.bpl">File C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\dclFMXfrx29.bpl not found</Excluded_Packages>
+                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\dclFMXfrxDB29.bpl">File C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\dclFMXfrxDB29.bpl not found</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\bcboffice2k290.bpl">Embarcadero C++Builder Office 2000 Servers Package</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\bcbofficexp290.bpl">Embarcadero C++Builder Office XP Servers Package</Excluded_Packages>
                     <Excluded_Packages Name="$(BDSBIN)\dcloffice2k290.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
                     <Excluded_Packages Name="$(BDSBIN)\dclofficexp290.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
                 </Excluded_Packages>

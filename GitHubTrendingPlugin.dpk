@@ -10,33 +10,33 @@ package GitHubTrendingPlugin;
 {$EXTENDEDSYNTAX ON}
 {$IMPORTEDDATA ON}
 {$IOCHECKS ON}
-{$LOCALSYMBOLS ON}
+{$LOCALSYMBOLS OFF}
 {$LONGSTRINGS ON}
 {$OPENSTRINGS ON}
-{$OPTIMIZATION OFF}
+{$OPTIMIZATION ON}
 {$OVERFLOWCHECKS OFF}
 {$RANGECHECKS OFF}
-{$REFERENCEINFO ON}
+{$REFERENCEINFO OFF}
 {$SAFEDIVIDE OFF}
-{$STACKFRAMES ON}
+{$STACKFRAMES OFF}
 {$TYPEDADDRESS OFF}
 {$VARSTRINGCHECKS ON}
 {$WRITEABLECONST OFF}
 {$MINENUMSIZE 1}
 {$IMAGEBASE $400000}
-{$DEFINE DEBUG}
+{$DEFINE RELEASE}
 {$ENDIF IMPLICITBUILDING}
-{$DESCRIPTION 'Ali Dehbansiahkarbon.(adehban@gmail.com)'}
+{$DESCRIPTION 'Github Trending Plugin(Ali Dehbansiahkarbon)'}
 {$LIBSUFFIX AUTO}
 {$DESIGNONLY}
 {$IMPLICITBUILD ON}
 
-requires
+rrequires
   rtl,
   vcl,
   designide;
 
-contains
+ocontains
   WP.GitHub.Constants in 'WP.GitHub.Constants.pas',
   WP.GitHub.Creator in 'WP.GitHub.Creator.pas',
   WP.GitHub.View in 'WP.GitHub.View.pas' {MainFrame: TFrame},
@@ -46,5 +46,5 @@ contains
   WP.GitHub.CustomMessage in 'WP.GitHub.CustomMessage.pas' {Frm_CustomMSG},
   WP.SplashIcon.Registration in 'WP.SplashIcon.Registration.pas';
 
-end.
+d.
 
