@@ -114,6 +114,24 @@
         <DelphiCompile Include="$(MainSource)">
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
+        <DCCReference Include="rtl.dcp"/>
+        <DCCReference Include="vcl.dcp"/>
+        <DCCReference Include="designide.dcp"/>
+        <DCCReference Include="WP.GitHub.Constants.pas"/>
+        <DCCReference Include="WP.GitHub.Creator.pas"/>
+        <DCCReference Include="WP.GitHub.View.pas">
+            <Form>MainFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="WP.GitHub.Helper.pas"/>
+        <DCCReference Include="WP.GitHub.LinkLabelEx.pas"/>
+        <DCCReference Include="WP.GitHub.Setting.pas">
+            <Form>Frm_Settings</Form>
+        </DCCReference>
+        <DCCReference Include="WP.GitHub.CustomMessage.pas">
+            <Form>Frm_CustomMSG</Form>
+        </DCCReference>
+        <DCCReference Include="WP.SplashIcon.Registration.pas"/>
         <RcItem Include="Resources\Star.bmp">
             <ResourceType>BITMAP</ResourceType>
             <ResourceId>STAR</ResourceId>

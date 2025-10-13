@@ -31,12 +31,12 @@ package GitHubTrendingPlugin;
 {$DESIGNONLY}
 {$IMPLICITBUILD ON}
 
-rrequires
+requires
   rtl,
   vcl,
   designide;
 
-ocontains
+contains
   WP.GitHub.Constants in 'WP.GitHub.Constants.pas',
   WP.GitHub.Creator in 'WP.GitHub.Creator.pas',
   WP.GitHub.View in 'WP.GitHub.View.pas' {MainFrame: TFrame},
@@ -46,5 +46,5 @@ ocontains
   WP.GitHub.CustomMessage in 'WP.GitHub.CustomMessage.pas' {Frm_CustomMSG},
   WP.SplashIcon.Registration in 'WP.SplashIcon.Registration.pas';
 
-d.
+end.
 
