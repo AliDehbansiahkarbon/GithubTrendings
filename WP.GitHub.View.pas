@@ -1054,8 +1054,7 @@ begin
       ListIndex := AIndex;
       TabOrder := 0;
       ParentColor := False;
-      ParentFont := False;
-      Font.Name := 'Segoe UI';
+      ParentFont := True;
       StyleElements := [seBorder];
 
       LinkColor    := clMenuHighlight;
@@ -1111,7 +1110,7 @@ begin
 
     LayoutRepositoryPanel(LvPanel);
   finally
-    ControlList1.Height := ControlList1.Height + LvPanel.Height;
+    ControlList1.Height := ControlList1.Height + LvPanel.Height + 1;
   end;
 end;
 
